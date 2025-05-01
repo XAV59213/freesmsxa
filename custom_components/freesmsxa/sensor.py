@@ -25,7 +25,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     service_name = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
     sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id)
     async_add_entities([sensor])
-    hass.data[DOMAIN].setdefault("sensors", []).append(sensor)
+    # Store sensor reference for use in notification service
+    hass.data[DOMAIN][f"{username}_sensor"] = sensor
 
 class FreeSMSStatusSensor(SensorEntity):
     """Sensor to display the status of the Free Mobile SMS API."""
