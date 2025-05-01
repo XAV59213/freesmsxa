@@ -17,16 +17,17 @@ from freesms import FreeClient
 
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.device_registry import DeviceEntryType, async_get as async_get_device_registry
 from homeassistant.helpers.typing import ConfigType
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "freesmsxa"
 
-# Define the schema for the notify service
+# Schema for the notify service
 NOTIFY_SCHEMA = vol.Schema({
     vol.Required("message"): cv.string
 })
@@ -36,30 +37,50 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    service_name = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
+    # Use CONF_NAME if provided, otherwise default to "name_phone" with username suffix
+    service_name = entry.data.get(CONF_NAME, f"name_phone_{username.replace('.', '_').lower()}")
+
+    # Create a device in the device registry
+    device_registry = async_get_device_registry(hass)
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, f"freesmsxa_{username}")},
+        name=f"Free Mobile SMS ({username})",
+        manufacturer="Free Mobile",
+        model="SMS Gateway",
+        sw_version="1.0",
+        entry_type=DeviceEntryType.SERVICE,
+    )
 
     # Create and register the notification service
+    notification_service = FreeSMSNotificationService(hass, username, access_token, service_name)
     hass.services.async_register(
         "notify",
         service_name,
-        FreeSMSNotificationService(hass, username, access_token, service_name).async_send_message,
+        notification_service.async_send_message,
         schema=NOTIFY_SCHEMA,
     )
     _LOGGER.debug("Registered notification service: notify.%s", service_name)
 
     # Store the service name for unloading
-    hass.data[DOMAIN][entry.entry_id] = service_name
+    hass.data[DOMAIN][entry.entry_id] = {
+        "service_name": service_name,
+    }
 
-    # Add sensor entity
+    # Set up sensor platform
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    service_name = hass.data[DOMAIN].pop(entry.entry_id, None)
+    data = hass.data[DOMAIN].pop(entry.entry_id, {})
+    service_name = data.get("service_name")
     if service_name:
         hass.services.async_remove("notify", service_name)
+        _LOGGER.debug("Unregistered notification service: notify.%s", service_name)
+
+    # Unload sensor platform
     await hass.config_entries.async_unload_platforms(entry, ["sensor"])
     return True
 
@@ -73,7 +94,7 @@ class FreeSMSNotificationService(BaseNotificationService):
         self.service_name = service_name
         self._username = username
 
-    async def async_send_message(self, message: str, **kwargs: any) -> None:
+    async def async_send_message(self, message: str, **kwargs: ConfigType) -> None:
         """Send a message to the Free Mobile user cell."""
         _LOGGER.debug("Attempting to send SMS to %s with message: %s", self._username, message)
         try:
@@ -95,16 +116,16 @@ class FreeSMSNotificationService(BaseNotificationService):
                 status = "Erreur : Serveur indisponible"
                 _LOGGER.error("Server error, try later")
 
-            # Update sensor state
-            sensor = next(
-                (entity for entity in self.hass.data[DOMAIN].get("sensors", [])
-                 if entity.service_name == self.service_name), None
-            )
-            if sensor:
-                sensor.update_state(status, datetime.now().isoformat())
-
         except Exception as exc:
             status = f"Erreur : {str(exc)}"
             _LOGGER.error("Failed to send SMS to %s: %s", self._username, exc)
-            if sensor:
-                sensor.update_state(status, datetime.now().isoformat())
+
+        # Update sensor state via event
+        hass.bus.async_fire(
+            f"{DOMAIN}_status_update",
+            {
+                "username": self._username,
+                "status": status,
+                "last_sent": hass.loop.time(),
+            }
+        )
