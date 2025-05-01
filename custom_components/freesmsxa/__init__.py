@@ -23,6 +23,8 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceEntryType, async_get as async_get_device_registry
 from homeassistant.helpers.typing import ConfigType
 
+from .notify import FreeSMSNotificationService
+
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "freesmsxa"
