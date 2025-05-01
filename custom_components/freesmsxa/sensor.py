@@ -45,7 +45,10 @@ class FreeSMSStatusSensor(SensorEntity):
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_extra_state_attributes = {
             "last_sent": None,
-            "sms_count": 0
+            "sms_count": 0,
+            "username": self._username,
+            "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
+            "service_name": self.service_name
         }
 
     def update_state(self, status: str, last_sent: str | None = None) -> None:
@@ -54,10 +57,13 @@ class FreeSMSStatusSensor(SensorEntity):
         if last_sent:
             self._last_sent = last_sent
             self._sms_count += 1
-            self._attr_extra_state_attributes = {
-                "last_sent": self._last_sent,
-                "sms_count": self._sms_count
-            }
+        self._attr_extra_state_attributes = {
+            "last_sent": self._last_sent,
+            "sms_count": self._sms_count,
+            "username": self._username,
+            "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
+            "service_name": self.service_name
+        }
         self.async_write_ha_state()
 
     @property
