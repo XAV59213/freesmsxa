@@ -26,9 +26,11 @@ from homeassistant.helpers.typing import ConfigType
 
 _LOGGER = logging.getLogger(__name__)
 
+DOMAIN = "freesmsxa"
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Free Mobile SMS from a config entry."""
-    hass.data.setdefault("freesmsxa", {})
+    hass.data.setdefault(DOMAIN, {})
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
     service_name = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
@@ -42,7 +44,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     # Store the service name for unloading
-    hass.data["freesmsxa"][entry.entry_id] = service_name
+    hass.data[DOMAIN][entry.entry_id] = service_name
 
     # Add sensor entity
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
@@ -51,7 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    service_name = hass.data["freesmsxa"].pop(entry.entry_id, None)
+    service_name = hass.data[DOMAIN].pop(entry.entry_id, None)
     if service_name:
         hass.services.async_remove("notify", service_name)
     await hass.config_entries.async_unload_platforms(entry, ["sensor"])
@@ -64,7 +66,7 @@ async def async_setup_entry_sensors(hass: HomeAssistant, entry: ConfigEntry, asy
     service_name = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
     sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id)
     async_add_entities([sensor])
-    hass.data["freesmsxa"].setdefault("sensors", []).append(sensor)
+    hass.data[DOMAIN].setdefault("sensors", []).append(sensor)
 
 class FreeSMSNotificationService(BaseNotificationService):
     """Implement a notification service for the Free Mobile SMS service."""
@@ -98,7 +100,7 @@ class FreeSMSNotificationService(BaseNotificationService):
 
             # Update sensor state
             sensor = next(
-                (entity for entity in self.hass.data["freesmsxa"].get("sensors", [])
+                (entity for entity in self.hass.data[DOMAIN].get("sensors", [])
                  if entity.service_name == self.service_name), None
             )
             if sensor:
