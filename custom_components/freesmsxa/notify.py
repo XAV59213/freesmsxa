@@ -15,12 +15,11 @@ import logging
 
 from freesms import FreeClient
 
-from homeassistant.components.notify import BaseNotificationService, ATTR_MESSAGE
+from homeassistant.components.notify import BaseNotificationService
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_USERNAME, CONF_ACCESS_TOKEN, CONF_NAME
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from . import DOMAIN
 
@@ -29,16 +28,19 @@ _LOGGER = logging.getLogger(__name__)
 async def async_get_service(
     hass: HomeAssistant,
     config: ConfigType,
-    discovery_info: ConfigType | None = None,
+    discovery_info: DiscoveryInfoType | None = None,
 ) -> BaseNotificationService | None:
     """Get the Free Mobile SMS XA notification service."""
+    _LOGGER.debug("Attempting to set up notify service with discovery_info: %s", discovery_info)
     if discovery_info is None:
+        _LOGGER.error("No discovery_info provided for notify service")
         return None
 
     username = discovery_info[CONF_USERNAME]
     access_token = discovery_info[CONF_ACCESS_TOKEN]
     service_name = discovery_info.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
 
+    _LOGGER.debug("Setting up notify service: notify.%s for username %s", service_name, username)
     return FreeSMSNotificationService(hass, username, access_token, service_name)
 
 class FreeSMSNotificationService(BaseNotificationService):
