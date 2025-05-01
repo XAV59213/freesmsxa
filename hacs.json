@@ -1,6 +1,6 @@
 {
-    "name": "freesmsxa",
-    "content_in_root": false,
-    "homeassistant": "2025.2.4",
-    "render_readme": true
+  "name": "Free Mobile SMS XA",
+  "content_in_root": false,
+  "homeassistant": "2023.6.0",
+  "render_readme": true
 }
