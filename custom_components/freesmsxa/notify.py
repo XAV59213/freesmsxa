@@ -24,11 +24,10 @@ NOTIFY_SCHEMA = vol.Schema({
 class FreeSMSNotificationService(BaseNotificationService):
     """Implement a notification service for the Free Mobile SMS device."""
 
-    def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str) -> None:
+    def __init__(self, hass: HomeAssistant, username: str, access_token: str) -> None:
         """Initialize the notification service."""
         self.hass = hass
         self.free_client = FreeClient(username, access_token)
-        self.service_name = service_name
         self._username = username
 
     @property
@@ -44,7 +43,7 @@ class FreeSMSNotificationService(BaseNotificationService):
 
     async def async_send_message(self, message: str, **kwargs) -> None:
         """Send a message to the Free Mobile user cell."""
-        _LOGGER.debug("Attempting to send SMS to %s with message: %s", self._username, message)
+        _LOGGER.debug("Sending SMS to %s with message: %s", self._username, message)
         try:
             resp = await self.hass.async_add_executor_job(
                 self.free_client.send_sms, message
