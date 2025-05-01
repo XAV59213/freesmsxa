@@ -37,15 +37,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    # Use CONF_NAME if provided, otherwise default to "name_phone" with username suffix
-    service_name = entry.data.get(CONF_NAME, f"name_phone_{username.replace('.', '_').lower()}")
+    name_phone = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
+    service_name = f"notify_{name_phone}"
 
     # Create a device in the device registry
     device_registry = async_get_device_registry(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, f"freesmsxa_{username}")},
-        name=f"Free Mobile SMS ({username})",
+        name=f"Free Mobile SMS ({name_phone})",
         manufacturer="Free Mobile",
         model="SMS Gateway",
         sw_version="1.0",
