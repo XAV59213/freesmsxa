@@ -1,78 +1,90 @@
 Free Mobile SMS XA pour Home Assistant
 
-Free Mobile SMS XA est un composant personnalisé pour Home Assistant qui permet d'envoyer des notifications par SMS via le service Free Mobile. Il prend en charge plusieurs lignes téléphoniques, chacune représentée par un appareil, un service de notification (par exemple, notify.nom_du_service), et une entité capteur pour suivre l'état de l'API.
+Free Mobile SMS XA est une intégration personnalisée pour Home Assistant qui permet d'envoyer des notifications SMS via le service Free Mobile. Chaque ligne téléphonique configurée crée un appareil, un service de notification (par exemple, notify.papa), et une entité capteur pour surveiller l'état de l'API.
 
 ✨ Fonctionnalités
 
-📱 Envoi de SMS : Envoyez des notifications SMS via l'API Free Mobile.
-🔄 Support multi-lignes : Configurez plusieurs lignes téléphoniques avec des noms personnalisés.
-🔔 Services de notification : Chaque ligne crée un service notify (par exemple, notify.papa).
-📊 Capteurs d'état : Suivez le statut de l'API, la date du dernier envoi, et le nombre total de SMS envoyés.
+📱 Notifications SMS : Envoyez des SMS via l'API Free Mobile depuis Home Assistant.
+🔄 Multi-lignes : Configurez plusieurs lignes téléphoniques avec des noms personnalisés.
+🔔 Services de notification : Chaque ligne génère un service notify (par exemple, notify.papa).
+📊 Capteurs d'état : Suivez l'état de l'API, la date du dernier envoi, et le nombre total de SMS envoyés.
 ✅ Validation automatique : Un SMS de test est envoyé lors de la configuration pour vérifier les identifiants.
-🌐 Intégration HACS : Facile à installer via HACS ou manuellement.
+🌐 Intégration HACS : Installation facile via HACS ou manuellement.
+
+
+📋 Prérequis
+
+Home Assistant version 2023.6.0 ou supérieure.
+Bibliothèque Python freesms>=0.2.1 installée dans l'environnement de Home Assistant :pip install freesms>=0.2.1
+
+
 
 
 🛠️ Installation
+Option 1 : Via HACS (recommandé)
 
-Téléchargez l'intégration :
-
-Via HACS :
-Ajoutez ce dépôt comme dépôt personnalisé dans HACS : https://github.com/xav59213/freesmsxa.
-Recherchez et installez "Free Mobile SMS XA".
-
-
-Manuellement :
-Copiez le dossier custom_components/freesmsxa dans le répertoire custom_components/ de votre configuration Home Assistant.
+Ajoutez ce dépôt comme dépôt personnalisé dans HACS :
+Allez à HACS > Intégrations > Menu (⁝) > Dépôts personnalisés.
+URL : https://github.com/xav59213/freesmsxa.
+Catégorie : Intégration.
 
 
+Recherchez "Free Mobile SMS XA" dans HACS et installez-le.
+Redémarrez Home Assistant.
 
+Option 2 : Installation manuelle
 
-Redémarrez Home Assistant :
+Copiez le dossier custom_components/freesmsxa dans le répertoire <votre dossier Home Assistant>/config/custom_components/.
+Redémarrez Home Assistant.
 
-Redémarrez Home Assistant pour charger l'intégration.
-
-
-Ajoutez une ligne téléphonique :
+Ajout d'une ligne téléphonique
 
 Accédez à Paramètres > Appareils et services > Ajouter une intégration.
-Recherchez "Free Mobile SMS XA".
-Entrez votre identifiant Free Mobile, le jeton d'accès API SMS, et éventuellement un nom personnalisé pour le service (par exemple, "papa"). Un SMS de test sera envoyé pour valider les identifiants.
-Répétez pour ajouter d’autres lignes si nécessaire.
+Recherchez Free Mobile SMS XA.
+Entrez :
+Nom d'utilisateur : Votre identifiant Free Mobile (par exemple, 12345678).
+Clé API : Votre jeton d'accès API SMS (trouvable dans votre espace client Free Mobile).
+Nom du service (optionnel) : Un nom personnalisé pour le service (par exemple, papa).
 
 
+Validez. Un SMS de test sera envoyé pour confirmer les identifiants.
+Répétez pour ajouter d'autres lignes si nécessaire.
+
+
+Note : Chaque ligne crée un appareil, un service de notification (notify.nom_du_service), et une entité capteur (sensor.freesmsxa_identifiant).
 
 
 ⚙️ Configuration
-Chaque ligne téléphonique configurée crée :
+L'intégration est configurée via l'interface utilisateur de Home Assistant. Chaque ligne téléphonique ajoutée génère :
 
-Un appareil dans Home Assistant (par exemple, "Free Mobile SMS (12345678)").
-Un service de notification de type notify (par exemple, notify.papa ou notify.freesmsxa_12345678 si aucun nom n'est spécifié).
-Une entité capteur (par exemple, sensor.freesmsxa_12345678) pour suivre l'état de l'API.
+Un appareil (par exemple, "Free Mobile SMS (12345678)") visible dans Paramètres > Appareils et services.
+Un service de notification de type notify (par exemple, notify.papa si le nom est papa, ou notify.freesmsxa_12345678 par défaut).
+Une entité capteur (par exemple, sensor.freesmsxa_12345678) pour surveiller l'état de l'API.
 
 Exemple de configuration
-Lors de l'ajout via l'interface, entrez les informations suivantes :
+Lors de l'ajout via l'interface, entrez :
 username: votre_identifiant_free_mobile
 access_token: votre_token_api_sms
 name: papa  # (facultatif) nom personnalisé du service
 
 
-username : Votre identifiant Free Mobile (par exemple, 12345678).
-access_token : Votre jeton d’accès API SMS, disponible dans votre espace client Free Mobile.
-name (optionnel) : Un nom personnalisé pour le service de notification (ex. : "Papa"). Les espaces et caractères spéciaux sont convertis (ex. : "Mon Téléphone" devient mon_telephone).
+username : Identifiant Free Mobile (par exemple, 12345678).
+access_token : Jeton d’accès API SMS (espace client Free Mobile).
+name : Nom personnalisé pour le service (ex. : papa). Les espaces et caractères spéciaux sont convertis (ex. : "Mon Téléphone" → mon_telephone).
 
 
-Note : Un SMS de test est envoyé lors de la configuration pour valider les identifiants.
+Note : Un SMS de test est envoyé pour valider les identifiants.
 
 
 📤 Utilisation
 Envoyer un SMS
-Utilisez le service de notification dans une automatisation ou un script. Exemple :
+Utilisez le service de notification dans une automatisation, un script, ou l'outil de développement. Exemple :
 service: notify.papa
 data:
   message: "Notification de test depuis Home Assistant"
 
 Vérifier l'état via le capteur
-Chaque ligne téléphonique crée une entité capteur pour suivre l'état de l'API. Exemple :
+Chaque ligne crée une entité capteur pour suivre l'état de l'API. Exemple :
 entity_id: sensor.freesmsxa_12345678
 attributes:
   last_sent: "2025-05-01T12:00:00"
@@ -100,10 +112,9 @@ automation:
 
 📦 Dépendances
 
-Bibliothèque Python freesms version ≥ 0.2.1
+Bibliothèque Python freesms>=0.2.1 :pip install freesms>=0.2.1
 
-Assurez-vous que la bibliothèque est installée dans votre environnement Home Assistant :
-pip install freesms>=0.2.1
+
 
 
 📄 Licence
@@ -112,22 +123,44 @@ Ce projet est distribué sous la licence GNU LGPL v2.1. Consultez le fichier LIC
 🤝 Contribution
 Les contributions sont les bienvenues ! Pour contribuer :
 
-Forkez le dépôt.
-Créez une branche pour vos modifications (git checkout -b feature/ma-fonctionnalite).
-Commitez vos changements (git commit -m "Ajout de ma fonctionnalité").
-Poussez votre branche (git push origin feature/ma-fonctionnalite).
-Ouvrez une Pull Request.
+Forkez le dépôt : Cliquez sur "Fork" sur GitHub.
+Créez une branche : git checkout -b feature/ma-fonctionnalite.
+Commitez vos changements : git commit -m "Ajout de ma fonctionnalité".
+Poussez votre branche : git push origin feature/ma-fonctionnalite.
+Ouvrez une Pull Request : Incluez une description claire de vos changements.
 
-Veuillez respecter les conventions de codage de Home Assistant et inclure des tests si possible.
+Veuillez respecter les conventions de codage de Home Assistant et ajouter des tests si possible. Pour signaler un bug ou proposer une fonctionnalité, ouvrez une issue en utilisant le modèle fourni.
 
-📚 Documentation
-Pour plus de détails, consultez le dépôt GitHub.
-Si vous rencontrez des problèmes, ouvrez une issue sur GitHub avec les journaux de débogage activés :
-logger:
+❓ FAQ
+Pourquoi le service notify.papa n'apparaît-il pas ?
+
+Vérifiez les journaux avec le mode débogage activé :logger:
   default: info
   logs:
     custom_components.freesmsxa: debug
 
 
+Assurez-vous que le nom saisi dans le flux de configuration (name) est valide (par exemple, papa).
+Vérifiez les attributs du capteur sensor.freesmsxa_<identifiant> pour confirmer service_name.
+
+Comment vérifier si mes identifiants sont corrects ?
+
+Un SMS de test est envoyé lors de la configuration. Si vous ne le recevez pas, vérifiez votre username et access_token dans votre espace client Free Mobile.
+Consultez les journaux pour des erreurs comme Erreur : Identifiants incorrects.
+
+Comment ajouter plusieurs lignes téléphoniques ?
+
+Répétez le processus d'ajout dans Paramètres > Appareils et services > Ajouter une intégration. Chaque ligne crée un nouvel appareil, service, et capteur.
+
+
+📚 Documentation
+Pour plus de détails, consultez le dépôt GitHub.
+En cas de problème, ouvrez une issue avec :
+
+Les journaux de débogage (custom_components.freesmsxa: debug).
+Une description détaillée du problème.
+Votre version de Home Assistant.
+
+
 ⭐ Remerciements
-Merci à la communauté Home Assistant et aux contributeurs pour leur soutien !
+Un grand merci à la communauté Home Assistant et à tous les contributeurs qui rendent ce projet possible !
