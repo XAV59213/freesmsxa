@@ -12,8 +12,6 @@ from homeassistant.components.notify import BaseNotificationService
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
-from . import DOMAIN
-
 _LOGGER = logging.getLogger(__name__)
 
 # Schema for the notify service
@@ -34,7 +32,7 @@ class FreeSMSNotificationService(BaseNotificationService):
     def device_info(self):
         """Return device information to link this service to a device."""
         return {
-            "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
+            "identifiers": {("freesmsxa", f"freesmsxa_{self._username}")},
             "name": f"Free Mobile SMS ({self._username})",
             "manufacturer": "Free Mobile",
             "model": "SMS Gateway",
@@ -67,12 +65,9 @@ class FreeSMSNotificationService(BaseNotificationService):
             status = f"Erreur : {str(exc)}"
             _LOGGER.error("Error sending SMS to %s: %s", self._username, exc)
 
-        # Fire event to update sensor
-        self.hass.bus.async_fire(
-            f"{DOMAIN}_status_update",
-            {
-                "username": self._username,
-                "status": status,
-                "last_sent": self.hass.loop.time(),
-            }
-        )
+        # Return status and timestamp for event firing in __init__.py
+        return {
+            "username": self._username,
+            "status": status,
+            "last_sent": self.hass.loop.time(),
+        }
