@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurer Free Mobile SMS XA",
-        "description": "Entrez les identifiants de votre compte Free Mobile pour configurer une ligne téléphonique.",
+        "description": "Entrez les identifiants de votre compte Free Mobile pour configurer une ligne téléphonique. Un SMS de test sera envoyé pour valider les identifiants.",
         "data": {
           "username": "Nom d'utilisateur",
           "access_token": "Clé API",
