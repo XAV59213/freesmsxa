@@ -1,10 +1,4 @@
-# Copyright (c) 2025 XAV59213
-# This file is part of the Free Mobile SMS XA integration for Home Assistant.
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation; either version 2.1
-# of the License, or (at your option) any later version.
-
+# custom_components/freesmsxa/config_flow.py
 """Config flow for Free Mobile SMS XA integration."""
 
 from __future__ import annotations
@@ -23,8 +17,10 @@ from homeassistant.helpers import config_validation as cv
 
 from . import DOMAIN
 
-def clean_service_name(name: str) -> str:
+def clean_service_name(name: str, username: str) -> str:
     """Clean and normalize a service name."""
+    if not name:
+        return f"freesmsxa_{username.replace('.', '_').lower()}"
     # Remove accents
     name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
     # Convert to lowercase, replace spaces and special characters with underscores
@@ -45,16 +41,15 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Validate service name if provided
             service_name = user_input.get(CONF_NAME)
-            if service_name:
-                service_name = clean_service_name(service_name)
-                if not service_name:
-                    errors["name"] = "invalid_service_name"
-                else:
-                    # Check if service name is already used
-                    for entry in self._async_current_entries():
-                        if entry.data.get(CONF_NAME) == service_name:
-                            errors["name"] = "service_name_already_configured"
-                            break
+            service_name = clean_service_name(service_name, user_input[CONF_USERNAME])
+            if not service_name:
+                errors["name"] = "invalid_service_name"
+            else:
+                # Check if service name is already used
+                for entry in self._async_current_entries():
+                    if entry.data.get(CONF_NAME) == service_name:
+                        errors["name"] = "service_name_already_configured"
+                        break
 
             # Check if username is already configured
             for entry in self._async_current_entries():
