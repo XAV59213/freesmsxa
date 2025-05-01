@@ -9,11 +9,8 @@
 
 from __future__ import annotations
 
-from http import HTTPStatus
 import logging
 import voluptuous as vol
-
-from freesms import FreeClient
 
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.config_entries import ConfigEntry
@@ -56,10 +53,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Create and register the notification service
     notification_service = FreeSMSNotificationService(hass, username, access_token)
+    async def handle_send_message(service_call: ServiceCall) -> None:
+        """Handle the service call to send a message."""
+        message = service_call.data.get("message")
+        result = await notification_service.async_send_message(message)
+        hass.bus.async_fire(
+            f"{DOMAIN}_status_update",
+            result
+        )
+
     hass.services.async_register(
         "notify",
         service_name,
-        notification_service.async_send_message,
+        handle_send_message,
         schema=NOTIFY_SCHEMA,
     )
     _LOGGER.info("Registered notification service: notify.%s", service_name)
