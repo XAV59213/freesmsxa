@@ -16,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 # Schema for the notify service
 NOTIFY_SCHEMA = vol.Schema({
-    vol.Required("message"): cv.string
+    vol.Required("message"): str
 })
 
 class FreeSMSNotificationService(BaseNotificationService):
