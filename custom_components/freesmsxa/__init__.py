@@ -10,13 +10,11 @@
 from __future__ import annotations
 
 import logging
-import voluptuous as vol
 
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import DeviceEntryType, async_get as async_get_device_registry
 from homeassistant.helpers.typing import ConfigType
 
@@ -26,11 +24,6 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "freesmsxa"
 CONF_PHONE_NUMBER = "phone_number"
-
-# Schema for the notify service
-NOTIFY_SCHEMA = vol.Schema({
-    vol.Required("message"): str
-})
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Free Mobile SMS from a config entry."""
@@ -55,14 +48,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     notification_service = FreeSMSNotificationService(hass, username, access_token)
     async def handle_send_message(service_call: ServiceCall) -> None:
         """Handle the service call to send a message."""
-        try:
-            # Convert ReadOnlyDict to mutable dict
-            data = NOTIFY_SCHEMA(dict(service_call.data))
-            message = data["message"]
-        except vol.Invalid as exc:
-            _LOGGER.error("Invalid service call data: %s", exc)
+        data = dict(service_call.data)
+        if "message" not in data:
+            _LOGGER.error("Missing required 'message' in service call data")
             return
-
+        message = data["message"]
         result = await notification_service.async_send_message(message)
         hass.bus.async_fire(
             f"{DOMAIN}_status_update",
@@ -73,9 +63,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "notify",
         service_name,
         handle_send_message,
-        schema=NOTIFY_SCHEMA,
     )
-    _LOGGER.info("Registered notification service: notify.%s with schema: %s", service_name, NOTIFY_SCHEMA)
+    _LOGGER.info("Registered notification service: notify.%s", service_name)
 
     # Store the service name for unloading
     hass.data[DOMAIN][entry.entry_id] = {
