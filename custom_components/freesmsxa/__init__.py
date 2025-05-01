@@ -56,7 +56,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     async def handle_send_message(service_call: ServiceCall) -> None:
         """Handle the service call to send a message."""
         try:
-            data = NOTIFY_SCHEMA(service_call.data)
+            # Convert ReadOnlyDict to mutable dict
+            data = NOTIFY_SCHEMA(dict(service_call.data))
             message = data["message"]
         except vol.Invalid as exc:
             _LOGGER.error("Invalid service call data: %s", exc)
