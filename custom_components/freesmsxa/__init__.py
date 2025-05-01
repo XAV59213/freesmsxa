@@ -29,7 +29,7 @@ CONF_PHONE_NUMBER = "phone_number"
 
 # Schema for the notify service
 NOTIFY_SCHEMA = vol.Schema({
-    vol.Required("message"): cv.string
+    vol.Required("message"): str
 })
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -55,7 +55,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     notification_service = FreeSMSNotificationService(hass, username, access_token)
     async def handle_send_message(service_call: ServiceCall) -> None:
         """Handle the service call to send a message."""
-        message = service_call.data.get("message")
+        try:
+            data = NOTIFY_SCHEMA(service_call.data)
+            message = data["message"]
+        except vol.Invalid as exc:
+            _LOGGER.error("Invalid service call data: %s", exc)
+            return
+
         result = await notification_service.async_send_message(message)
         hass.bus.async_fire(
             f"{DOMAIN}_status_update",
@@ -68,7 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         handle_send_message,
         schema=NOTIFY_SCHEMA,
     )
-    _LOGGER.info("Registered notification service: notify.%s", service_name)
+    _LOGGER.info("Registered notification service: notify.%s with schema: %s", service_name, NOTIFY_SCHEMA)
 
     # Store the service name for unloading
     hass.data[DOMAIN][entry.entry_id] = {
