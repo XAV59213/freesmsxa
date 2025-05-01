@@ -1,0 +1,11 @@
+{
+  "domain": "freesmsxa",
+  "name": "Free Mobile SMS XA",
+  "version": "1.0.0",
+  "documentation": "https://github.com/yourusername/hass-freesmsxa",
+  "dependencies": [],
+  "codeowners": ["@XAV59213],
+  "requirements": ["freesms>=1.0.0"],
+  "iot_class": "cloud_push",
+  "config_flow": true
+}
