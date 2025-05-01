@@ -13,7 +13,6 @@ from http import HTTPStatus
 import re
 import unicodedata
 import voluptuous as vol
-import logging
 
 from freesms import FreeClient
 
@@ -23,8 +22,6 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 
 from . import DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
 
 def clean_service_name(name: str) -> str:
     """Clean and normalize a service name."""
@@ -50,7 +47,6 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             service_name = user_input.get(CONF_NAME)
             if service_name:
                 service_name = clean_service_name(service_name)
-                _LOGGER.debug("Normalized service name: %s (original: %s)", service_name, user_input[CONF_NAME])
                 if not service_name:
                     errors["name"] = "invalid_service_name"
                 else:
@@ -77,7 +73,6 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         errors["base"] = "invalid_credentials"
                     elif resp.status_code == HTTPStatus.OK:
                         # Credentials are valid, create entry
-                        _LOGGER.debug("Creating config entry for username %s with service name %s", user_input[CONF_USERNAME], service_name)
                         return self.async_create_entry(
                             title=f"Free Mobile SMS ({user_input[CONF_USERNAME]})",
                             data={
@@ -89,7 +84,7 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     else:
                         errors["base"] = "api_error"
                 except Exception as exc:
-                    _LOGGER.error("Error testing credentials for username %s: %s", user_input[CONF_USERNAME], exc)
+                    _LOGGER.error("Error testing credentials: %s", exc)
                     errors["base"] = "invalid_config"
 
         return self.async_show_form(

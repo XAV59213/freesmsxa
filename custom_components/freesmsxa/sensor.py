@@ -25,8 +25,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     service_name = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
     sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id)
     async_add_entities([sensor])
-    # Store sensor reference for use in notification service
-    hass.data[DOMAIN][f"{username}_sensor"] = sensor
+    hass.data[DOMAIN].setdefault("sensors", []).append(sensor)
 
 class FreeSMSStatusSensor(SensorEntity):
     """Sensor to display the status of the Free Mobile SMS API."""
@@ -49,8 +48,7 @@ class FreeSMSStatusSensor(SensorEntity):
             "sms_count": 0,
             "username": self._username,
             "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
-            "service_name": self.service_name,
-            "service_type": "notify"
+            "service_name": self.service_name
         }
 
     def update_state(self, status: str, last_sent: str | None = None) -> None:
@@ -64,8 +62,7 @@ class FreeSMSStatusSensor(SensorEntity):
             "sms_count": self._sms_count,
             "username": self._username,
             "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
-            "service_name": self.service_name,
-            "service_type": "notify"
+            "service_name": self.service_name
         }
         self.async_write_ha_state()
 
