@@ -10,26 +10,28 @@ from homeassistant.const import CONF_USERNAME, CONF_ACCESS_TOKEN, CONF_NAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import DOMAIN
+from . import DOMAIN, CONF_PHONE_NUMBER
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up the sensor platform."""
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
     name_phone = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
+    phone_number = entry.data.get(CONF_PHONE_NUMBER)
     service_name = f"notify_{name_phone}"
-    sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id)
+    sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id, phone_number)
     async_add_entities([sensor])
 
 class FreeSMSStatusSensor(SensorEntity):
     """Sensor to display the status of the Free Mobile SMS API."""
 
-    def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str, entry_id: str) -> None:
+    def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str, entry_id: str, phone_number: str | None) -> None:
         """Initialize the sensor."""
         self.hass = hass
         self._username = username
         self._access_token = access_token
         self.service_name = service_name
+        self._phone_number = phone_number
         self._state = "Inconnu"
         self._sms_count = 0
         self._last_sent = None
@@ -42,6 +44,7 @@ class FreeSMSStatusSensor(SensorEntity):
             "sms_count": 0,
             "username": self._username,
             "service_name": self.service_name,
+            "phone_number": self._phone_number,
         }
 
         # Listen for status updates
@@ -74,6 +77,7 @@ class FreeSMSStatusSensor(SensorEntity):
             "sms_count": self._sms_count,
             "username": self._username,
             "service_name": self.service_name,
+            "phone_number": self._phone_number,
         }
         self.async_write_ha_state()
 
