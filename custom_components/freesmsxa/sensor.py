@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import DOMAIN, CONF_PHONE_NUMBER
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
-    """Set up the sensor platform."""
+    """Set up the sensor platform for a Free Mobile SMS device."""
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
     name_phone = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
@@ -26,7 +26,7 @@ class FreeSMSStatusSensor(SensorEntity):
     """Sensor to display the status of the Free Mobile SMS API."""
 
     def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str, entry_id: str, phone_number: str | None) -> None:
-        """Initialize the sensor."""
+        """Initialize the sensor for the Free Mobile SMS device."""
         self.hass = hass
         self._username = username
         self._access_token = access_token
