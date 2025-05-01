@@ -40,7 +40,6 @@ class FreeSMSNotificationService(BaseNotificationService):
             "manufacturer": "Free Mobile",
             "model": "SMS Gateway",
             "sw_version": "1.0",
-
         }
 
     async def async_send_message(self, message: str, **kwargs) -> None:
