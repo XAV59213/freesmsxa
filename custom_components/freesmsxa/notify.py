@@ -1,28 +1,22 @@
-# Copyright (c) 2025 XAV59213
-# This file is part of the Free Mobile SMS XA integration for Home Assistant.
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation; either version 2.1
-# of the License, or (at your option) any later version.
-
+# custom_components/freesmsxa/notify.py
 """Notification service for Free Mobile SMS XA integration."""
 
 from __future__ import annotations
 
-from datetime import datetime
 from http import HTTPStatus
 import logging
-
-from freesms import FreeClient, FreeSMSError
 import voluptuous as vol
 
+from freesms import FreeClient, FreeSMSError
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
+from . import DOMAIN
+
 _LOGGER = logging.getLogger(__name__)
 
-# Define the schema for the notify service
+# Schema for the notify service
 NOTIFY_SCHEMA = vol.Schema({
     vol.Required("message"): cv.string
 })
@@ -37,16 +31,25 @@ class FreeSMSNotificationService(BaseNotificationService):
         self.service_name = service_name
         self._username = username
 
+    @property
+    def device_info(self):
+        """Return device information to link this service to a device."""
+        return {
+            "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
+            "name": f"Free Mobile SMS ({self._username})",
+            "manufacturer": "Free Mobile",
+            "model": "SMS Gateway",
+            "sw_version": "1.0",
+        }
+
     async def async_send_message(self, message: str, **kwargs) -> None:
         """Send a message to the Free Mobile user cell."""
         _LOGGER.debug("Attempting to send SMS to %s with message: %s", self._username, message)
         try:
-            # Send SMS using the FreeClient
             resp = await self.hass.async_add_executor_job(
                 self.free_client.send_sms, message
             )
 
-            # Handle response status
             status = "OK"
             if resp.status_code == HTTPStatus.BAD_REQUEST:
                 status = "Erreur : Paramètre manquant"
@@ -61,20 +64,19 @@ class FreeSMSNotificationService(BaseNotificationService):
                 status = "Erreur : Serveur indisponible"
                 _LOGGER.error("Server error for %s, try later", self._username)
 
-            # Update sensor state
-            sensor = self.hass.data.get("freesmsxa", {}).get(f"{self._username}_sensor")
-            if sensor:
-                sensor.update_state(status, datetime.now().isoformat())
-            else:
-                _LOGGER.warning("No sensor found for service %s", self.service_name)
-
         except FreeSMSError as exc:
             status = f"Erreur API : {str(exc)}"
             _LOGGER.error("Free Mobile API error for %s: %s", self._username, exc)
-            if sensor:
-                sensor.update_state(status, datetime.now().isoformat())
         except Exception as exc:
             status = f"Erreur inattendue : {str(exc)}"
             _LOGGER.error("Unexpected error sending SMS to %s: %s", self._username, exc)
-            if sensor:
-                sensor.update_state(status, datetime.now().isoformat())
+
+        # Fire event to update sensor
+        self.hass.bus.async_fire(
+            f"{DOMAIN}_status_update",
+            {
+                "username": self._username,
+                "status": status,
+                "last_sent": self.hass.loop.time(),
+            }
+        )
