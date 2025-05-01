@@ -22,10 +22,10 @@ NOTIFY_SCHEMA = vol.Schema({
 })
 
 class FreeSMSNotificationService(BaseNotificationService):
-    """Implement a notification service for the Free Mobile SMS service."""
+    """Implement a notification service for the Free Mobile SMS device."""
 
     def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str) -> None:
-        """Initialize the service."""
+        """Initialize the notification service."""
         self.hass = hass
         self.free_client = FreeClient(username, access_token)
         self.service_name = service_name
@@ -40,6 +40,7 @@ class FreeSMSNotificationService(BaseNotificationService):
             "manufacturer": "Free Mobile",
             "model": "SMS Gateway",
             "sw_version": "1.0",
+
         }
 
     async def async_send_message(self, message: str, **kwargs) -> None:
