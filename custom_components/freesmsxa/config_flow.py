@@ -15,11 +15,9 @@ from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_USERNAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 
-from . import DOMAIN
+from . import DOMAIN, CONF_PHONE_NUMBER
 
-CONF_PHONE_NUMBER = "phone_number"
-
-def clean_service_name(name: str, username: str) -> str:
+def clean_device_name(name: str, username: str) -> str:
     """Clean and normalize a device name."""
     if not name:
         return f"freesmsxa_{username.replace('.', '_').lower()}"
@@ -55,7 +53,7 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Validate device name if provided
             device_name = user_input.get(CONF_NAME)
-            device_name = clean_service_name(device_name, user_input[CONF_USERNAME])
+            device_name = clean_device_name(device_name, user_input[CONF_USERNAME])
             if not device_name:
                 errors["name"] = "invalid_service_name"
             else:
