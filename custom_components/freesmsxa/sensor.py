@@ -1,10 +1,4 @@
-# Copyright (c) 2025 XAV59213
-# This file is part of the Free Mobile SMS XA integration for Home Assistant.
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation; either version 2.1
-# of the License, or (at your option) any later version.
-
+# custom_components/freesmsxa/sensor.py
 """Sensor platform for Free Mobile SMS XA integration."""
 
 from __future__ import annotations
@@ -13,7 +7,7 @@ from datetime import datetime
 from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_USERNAME, CONF_ACCESS_TOKEN, CONF_NAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import DOMAIN
@@ -22,10 +16,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     """Set up the sensor platform."""
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    service_name = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
+    service_name = entry.data.get(CONF_NAME, f"name_phone_{username.replace('.', '_').lower()}")
     sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id)
     async_add_entities([sensor])
-    hass.data[DOMAIN].setdefault("sensors", []).append(sensor)
 
 class FreeSMSStatusSensor(SensorEntity):
     """Sensor to display the status of the Free Mobile SMS API."""
@@ -47,22 +40,39 @@ class FreeSMSStatusSensor(SensorEntity):
             "last_sent": None,
             "sms_count": 0,
             "username": self._username,
-            "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
-            "service_name": self.service_name
+            "service_name": self.service_name,
         }
 
-    def update_state(self, status: str, last_sent: str | None = None) -> None:
-        """Update the sensor state and attributes."""
-        self._state = status
-        if last_sent:
-            self._last_sent = last_sent
+        # Listen for status updates
+        hass.bus.async_listen(f"{DOMAIN}_status_update", self._handle_status_update)
+
+    @property
+    def device_info(self):
+        """Return device information to link this entity to a device."""
+        return {
+            "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
+            "name": f"Free Mobile SMS ({self._username})",
+            "manufacturer": "Free Mobile",
+            "model": "SMS Gateway",
+            "sw_version": "1.0",
+        }
+
+    @callback
+    def _handle_status_update(self, event):
+        """Handle status update events."""
+        if event.data.get("username") != self._username:
+            return
+
+        self._state = event.data.get("status", "Inconnu")
+        if event.data.get("last_sent"):
             self._sms_count += 1
+            self._last_sent = datetime.fromtimestamp(event.data["last_sent"]).isoformat()
+
         self._attr_extra_state_attributes = {
             "last_sent": self._last_sent,
             "sms_count": self._sms_count,
             "username": self._username,
-            "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
-            "service_name": self.service_name
+            "service_name": self.service_name,
         }
         self.async_write_ha_state()
 
