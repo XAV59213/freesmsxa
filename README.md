@@ -12,21 +12,24 @@ Configuration
 
 username: Your Free Mobile account username.
 access_token: Your Free Mobile SMS API access token.
-name (optional): A custom name for the notification service (e.g., "ligne1"). If not provided, defaults to freesmsxa_<username>.
+name (optional): A custom name for the notification service (e.g., "Mon Téléphone"). Spaces and special characters are automatically converted (e.g., to mon_telephone).
 
 Each configured phone line creates:
 
-A notification service (e.g., notify.ligne1 or notify.freesmsxa_12345678).
-A sensor entity (e.g., sensor.freesmsxa_12345678) showing the API status.
+A notification service (e.g., notify.mon_telephone or notify.freesmsxa_12345678).
+A sensor entity (e.g., sensor.freesmsxa_12345678) showing the API status, last sent time, and SMS count.
 
 Usage
-Use the notification service in automations or scripts. For example, with a custom name ligne1:
-service: notify.ligne1
+Use the notification service in automations or scripts. For example, with a custom name mon_telephone:
+service: notify.mon_telephone
 data:
   message: "Test notification from Home Assistant"
 
-Check the sensor for the API status:
+Check the sensor for the API status and additional attributes:
 entity_id: sensor.freesmsxa_12345678
+attributes:
+  last_sent: "2025-05-01T12:00:00"
+  sms_count: 5
 
 Requirements
 
