@@ -26,6 +26,7 @@ from homeassistant.helpers.typing import ConfigType
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "freesmsxa"
+CONF_PHONE_NUMBER = "phone_number"
 
 # Schema for the notify service
 NOTIFY_SCHEMA = vol.Schema({
