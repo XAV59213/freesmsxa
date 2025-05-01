@@ -7,7 +7,7 @@ from http import HTTPStatus
 import logging
 import voluptuous as vol
 
-from freesms import FreeClient, FreeSMSError
+from freesms import FreeClient
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
@@ -63,12 +63,9 @@ class FreeSMSNotificationService(BaseNotificationService):
                 status = "Erreur : Serveur indisponible"
                 _LOGGER.error("Server error for %s, try later", self._username)
 
-        except FreeSMSError as exc:
-            status = f"Erreur API : {str(exc)}"
-            _LOGGER.error("Free Mobile API error for %s: %s", self._username, exc)
         except Exception as exc:
-            status = f"Erreur inattendue : {str(exc)}"
-            _LOGGER.error("Unexpected error sending SMS to %s: %s", self._username, exc)
+            status = f"Erreur : {str(exc)}"
+            _LOGGER.error("Error sending SMS to %s: %s", self._username, exc)
 
         # Fire event to update sensor
         self.hass.bus.async_fire(
