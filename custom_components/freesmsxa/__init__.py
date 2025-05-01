@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from http import HTTPStatus
 import logging
-import voluptuous as vol
 
 from freesms import FreeClient
 
@@ -26,11 +25,6 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "freesmsxa"
 
-# Define the schema for the notify service
-NOTIFY_SCHEMA = vol.Schema({
-    vol.Required("message"): cv.string
-})
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Free Mobile SMS from a config entry."""
     hass.data.setdefault(DOMAIN, {})
@@ -43,9 +37,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "notify",
         service_name,
         FreeSMSNotificationService(hass, username, access_token, service_name).async_send_message,
-        schema=NOTIFY_SCHEMA,
+        schema=None,
     )
-    _LOGGER.debug("Registered notification service: notify.%s", service_name)
 
     # Store the service name for unloading
     hass.data[DOMAIN][entry.entry_id] = service_name
@@ -71,11 +64,9 @@ class FreeSMSNotificationService(BaseNotificationService):
         self.hass = hass
         self.free_client = FreeClient(username, access_token)
         self.service_name = service_name
-        self._username = username
 
     async def async_send_message(self, message: str, **kwargs: any) -> None:
         """Send a message to the Free Mobile user cell."""
-        _LOGGER.debug("Attempting to send SMS to %s with message: %s", self._username, message)
         try:
             resp = await self.hass.async_add_executor_job(
                 self.free_client.send_sms, message
@@ -105,6 +96,6 @@ class FreeSMSNotificationService(BaseNotificationService):
 
         except Exception as exc:
             status = f"Erreur : {str(exc)}"
-            _LOGGER.error("Failed to send SMS to %s: %s", self._username, exc)
+            _LOGGER.error("Failed to send SMS: %s", exc)
             if sensor:
                 sensor.update_state(status, datetime.now().isoformat())
