@@ -48,7 +48,8 @@ class FreeSMSStatusSensor(SensorEntity):
             "sms_count": 0,
             "username": self._username,
             "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
-            "service_name": self.service_name
+            "service_name": self.service_name,
+            "service_type": "notify"
         }
 
     def update_state(self, status: str, last_sent: str | None = None) -> None:
@@ -62,7 +63,8 @@ class FreeSMSStatusSensor(SensorEntity):
             "sms_count": self._sms_count,
             "username": self._username,
             "access_token": "********",  # Masqué pour la sécurité, décommentez pour débogage
-            "service_name": self.service_name
+            "service_name": self.service_name,
+            "service_type": "notify"
         }
         self.async_write_ha_state()
 
