@@ -5,7 +5,7 @@
 # as published by the Free Software Foundation; either version 2.1
 # of the License, or (at your option) any later version.
 
-"""Support for Free Mobile SMS platform as a notification service in Home Assistant."""
+"""Support for Free Mobile SMS platform as a notification device in Home Assistant."""
 
 from __future__ import annotations
 
@@ -86,10 +86,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 class FreeSMSNotificationService(BaseNotificationService):
-    """Implement a notification service for the Free Mobile SMS service."""
+    """Implement a notification service for the Free Mobile SMS device."""
 
     def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str) -> None:
-        """Initialize the service."""
+        """Initialize the notification service."""
         self.hass = hass
         self.free_client = FreeClient(username, access_token)
         self.service_name = service_name
