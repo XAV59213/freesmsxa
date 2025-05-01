@@ -5,19 +5,12 @@ from __future__ import annotations
 
 from http import HTTPStatus
 import logging
-import voluptuous as vol
 
 from freesms import FreeClient
 from homeassistant.components.notify import BaseNotificationService
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
-
-# Schema for the notify service
-NOTIFY_SCHEMA = vol.Schema({
-    vol.Required("message"): str
-})
 
 class FreeSMSNotificationService(BaseNotificationService):
     """Implement a notification service for the Free Mobile SMS device."""
