@@ -2,7 +2,7 @@
   "domain": "freesmsxa",
   "name": "Free Mobile SMS XA",
   "version": "1.0.0",
-  "documentation": "https://github.com/XAV59213/hass-freesmsxa",
+  "documentation": "https://github.com/xav59213/freesmsxa",
   "dependencies": [],
   "codeowners": ["@XAV59213"],
   "requirements": ["freesms>=0.2.1"],
