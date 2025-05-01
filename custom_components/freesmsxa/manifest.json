@@ -3,7 +3,7 @@
   "name": "Free Mobile SMS XA",
   "version": "1.0.0",
   "documentation": "https://github.com/xav59213/freesmsxa",
-  "dependencies": [],
+  "dependencies": ["notify"],
   "codeowners": ["@XAV59213"],
   "requirements": ["freesms>=0.2.1"],
   "iot_class": "cloud_push",
