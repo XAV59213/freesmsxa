@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_USERNAME, CONF_ACCESS_TOKEN, CONF_NAME
+from homeassistant.const import CONF_USERNAME, CONF_ACCESS_TOKEN, CONF_NAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 
@@ -34,13 +34,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_NAME: service_name
     }
 
-    # Add sensor entity
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor", "notify"])
+    # Forward setup to sensor and notify platforms
+    _LOGGER.debug("Setting up platforms for entry %s: %s", entry.entry_id, [Platform.SENSOR, Platform.NOTIFY])
+    await hass.config_entries.async_forward_entry_setups(entry, [Platform.SENSOR, Platform.NOTIFY])
 
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     hass.data[DOMAIN].pop(entry.entry_id, None)
-    await hass.config_entries.async_unload_platforms(entry, ["sensor", "notify"])
+    await hass.config_entries.async_unload_platforms(entry, [Platform.SENSOR, Platform.NOTIFY])
     return True
