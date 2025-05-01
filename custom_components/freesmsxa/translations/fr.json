@@ -5,19 +5,21 @@
         "title": "Configurer Free Mobile SMS XA",
         "description": "Entrez les identifiants de votre compte Free Mobile pour configurer une ligne téléphonique. Un SMS de test sera envoyé pour valider les identifiants.",
         "data": {
-          "username": "ID du compte free",
+          "username": "Identifiant Free Mobile",
           "access_token": "Clé API",
-          "name": "Nom du TÉLÉPHONE (optionnel)"
+          "name": "Nom de l'appareil (optionnel)",
+          "phone_number": "Numéro de téléphone (optionnel)"
         }
       }
     },
     "error": {
-      "username_already_configured": "Ce nom d'utilisateur est déjà configuré.",
-      "service_name_already_configured": "Ce nom de service est déjà utilisé.",
-      "invalid_service_name": "Le nom du service contient des caractères invalides ou est vide après nettoyage.",
-      "invalid_credentials": "Identifiants incorrects, veuillez vérifier votre nom d'utilisateur et votre clé API.",
+      "username_already_configured": "Cet identifiant est déjà configuré.",
+      "service_name_already_configured": "Ce nom d’appareil est déjà utilisé.",
+      "invalid_service_name": "Le nom de l’appareil contient des caractères invalides ou est vide après nettoyage.",
+      "invalid_credentials": "Identifiants incorrects, veuillez vérifier votre identifiant et votre clé API.",
       "invalid_config": "Erreur de configuration, veuillez vérifier vos identifiants.",
-      "api_error": "Erreur lors de la communication avec l'API Free Mobile."
+      "api_error": "Erreur lors de la communication avec l'API Free Mobile.",
+      "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678)."
     }
   }
 }
