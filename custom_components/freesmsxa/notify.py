@@ -1,66 +1,50 @@
-"""Support for Free Mobile SMS platform."""
+"""Notify platform for Free Mobile SMS XA."""
 
 from __future__ import annotations
-
-from http import HTTPStatus
 import logging
+from http import HTTPStatus
 
 from freesms import FreeClient
-import voluptuous as vol
-
-from homeassistant.components.notify import (
-    PLATFORM_SCHEMA as NOTIFY_PLATFORM_SCHEMA,
-    BaseNotificationService,
-)
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
+from homeassistant.components.notify import BaseNotificationService
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.typing import DiscoveryInfoType
+
+from .const import DOMAIN
+from .sensor import update_sensor_state
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = NOTIFY_PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_USERNAME): cv.string,
-        vol.Required(CONF_ACCESS_TOKEN): cv.string,
-    }
-)
-
-
-def get_service(
-    hass: HomeAssistant,
-    config: ConfigType,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> FreeSMSNotificationService:
-    """Get the Free Mobile SMS notification service."""
-    return FreeSMSNotificationService(config[CONF_USERNAME], config[CONF_ACCESS_TOKEN])
-
+async def async_get_service(hass: HomeAssistant, config: dict, discovery_info: DiscoveryInfoType | None = None) -> BaseNotificationService:
+    if discovery_info is None:
+        return None
+    entry_id = discovery_info["entry_id"]
+    data = hass.data[DOMAIN][entry_id]
+    return FreeSMSNotificationService(hass, data["username"], data["access_token"])
 
 class FreeSMSNotificationService(BaseNotificationService):
-    """Implement a notification service for the Free Mobile SMS service."""
-
-    def __init__(self, username: str, access_token: str) -> None:
-        """Initialize the service."""
+    def __init__(self, hass: HomeAssistant, username: str, access_token: str) -> None:
+        self.hass = hass
         self.free_client = FreeClient(username, access_token)
         self._username = username
 
-    def send_message(self, message="", **kwargs):
-        """Send a message to the Free Mobile user cell."""
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
+            "name": f"Free Mobile SMS ({self._username})",
+            "manufacturer": "Free Mobile",
+            "model": "SMS Gateway",
+            "sw_version": "1.0",
+        }
+
+    def send_message(self, message: str = "", **kwargs) -> None:
         _LOGGER.debug("Sending SMS to %s: %s", self._username, message)
         try:
             resp = self.free_client.send_sms(message)
-
             if resp.status_code == HTTPStatus.OK:
-                _LOGGER.info("SMS sent successfully for %s", self._username)
-            elif resp.status_code == HTTPStatus.BAD_REQUEST:
-                _LOGGER.error("Paramètre manquant pour %s", self._username)
-            elif resp.status_code == HTTPStatus.PAYMENT_REQUIRED:
-                _LOGGER.error("Limite de SMS atteinte pour %s", self._username)
-            elif resp.status_code == HTTPStatus.FORBIDDEN:
-                _LOGGER.error("Identifiants incorrects pour %s", self._username)
-            elif resp.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
-                _LOGGER.error("Erreur serveur pour %s", self._username)
+                _LOGGER.info("SMS sent for %s", self._username)
+                update_sensor_state(self.hass, self._username)
             else:
-                _LOGGER.error("Erreur inconnue %s: %s", self._username, resp.status_code)
+                _LOGGER.warning("Failed to send SMS (%s): %s", self._username, resp.status_code)
         except Exception as exc:
-            _LOGGER.error("Erreur d'envoi SMS %s: %s", self._username, exc)
+            _LOGGER.error("Error sending SMS to %s: %s", self._username, exc)

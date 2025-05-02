@@ -1,58 +1,42 @@
-# custom_components/freesmsxa/sensor.py
-"""Sensor platform for Free Mobile SMS XA integration."""
-
-from __future__ import annotations
+"""Sensor for Free Mobile SMS XA."""
 
 from datetime import datetime
-from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_USERNAME, CONF_ACCESS_TOKEN, CONF_NAME
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import CONF_USERNAME
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import DOMAIN, CONF_PHONE_NUMBER
+from .const import DOMAIN
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
-    """Set up the sensor platform for a Free Mobile SMS device."""
+sensors = {}
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
     username = entry.data[CONF_USERNAME]
-    access_token = entry.data[CONF_ACCESS_TOKEN]
-    name_phone = entry.data.get(CONF_NAME, f"freesmsxa_{username.replace('.', '_').lower()}")
-    phone_number = entry.data.get(CONF_PHONE_NUMBER)
-    service_name = f"notify_{name_phone}"
-    sensor = FreeSMSStatusSensor(hass, username, access_token, service_name, entry.entry_id, phone_number)
+    sensor = FreeSMSSensor(entry.entry_id, username)
+    sensors[username] = sensor
     async_add_entities([sensor])
 
-class FreeSMSStatusSensor(SensorEntity):
-    """Sensor to display the status of the Free Mobile SMS API."""
+def update_sensor_state(hass: HomeAssistant, username: str):
+    if username in sensors:
+        sensors[username].notify_sent()
 
-    def __init__(self, hass: HomeAssistant, username: str, access_token: str, service_name: str, entry_id: str, phone_number: str | None) -> None:
-        """Initialize the sensor for the Free Mobile SMS device."""
-        self.hass = hass
-        self._username = username
-        self._access_token = access_token
-        self.service_name = service_name
-        self._phone_number = phone_number
-        self._state = "Inconnu"
-        self._sms_count = 0
-        self._last_sent = None
-        self._attr_unique_id = f"freesmsxa_{entry_id}_status"
+class FreeSMSSensor(SensorEntity):
+    def __init__(self, entry_id: str, username: str):
         self._attr_name = f"Free Mobile SMS {username} Status"
-        self._attr_icon = "mdi:cellphone-message"
-        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_unique_id = f"freesmsxa_{entry_id}_status"
+        self._attr_icon = "mdi:message-text"
         self._attr_extra_state_attributes = {
-            "last_sent": None,
             "sms_count": 0,
-            "username": self._username,
-            "service_name": self.service_name,
-            "phone_number": self._phone_number,
+            "last_sent": None,
+            "username": username,
         }
-
-        # Listen for status updates
-        hass.bus.async_listen(f"{DOMAIN}_status_update", self._handle_status_update)
+        self._state = "Idle"
+        self._username = username
+        self._sms_count = 0
 
     @property
     def device_info(self):
-        """Return device information to link this entity to a device."""
         return {
             "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
             "name": f"Free Mobile SMS ({self._username})",
@@ -61,27 +45,13 @@ class FreeSMSStatusSensor(SensorEntity):
             "sw_version": "1.0",
         }
 
-    @callback
-    def _handle_status_update(self, event):
-        """Handle status update events."""
-        if event.data.get("username") != self._username:
-            return
-
-        self._state = event.data.get("status", "Inconnu")
-        if event.data.get("last_sent"):
-            self._sms_count += 1
-            self._last_sent = datetime.fromtimestamp(event.data["last_sent"]).isoformat()
-
-        self._attr_extra_state_attributes = {
-            "last_sent": self._last_sent,
-            "sms_count": self._sms_count,
-            "username": self._username,
-            "service_name": self.service_name,
-            "phone_number": self._phone_number,
-        }
-        self.async_write_ha_state()
-
     @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
+    def state(self):
         return self._state
+
+    def notify_sent(self):
+        self._sms_count += 1
+        self._attr_extra_state_attributes["sms_count"] = self._sms_count
+        self._attr_extra_state_attributes["last_sent"] = datetime.now().isoformat()
+        self._state = "Last sent"
+        self.async_write_ha_state()
