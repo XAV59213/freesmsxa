@@ -1,0 +1,17 @@
+send_sms:
+  name: Envoyer un SMS via Free Mobile
+  description: Envoie un message via un des services SMS configurés
+  fields:
+    target:
+      name: Nom du service cible
+      description: Nom du service notify (ex: "mon_telephone" ou "freesmsxa_12345678")
+      required: true
+      example: mon_telephone
+      selector:
+        text:
+    message:
+      name: Message
+      description: Message à envoyer
+      required: true
+      selector:
+        text:
