@@ -30,9 +30,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    service_name = f"freesmsxa_{username.replace('.', '_').lower()}"
+    service_name = entry.data.get("name") or f"freesmsxa_{username.replace('.', '_').lower()}"
 
-    # Create a device in the device registry
+    # Crée un appareil dans le registre
     device_registry = async_get_device_registry(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -44,46 +44,71 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry_type=DeviceEntryType.SERVICE,
     )
 
-    # Create and register the notification service
+    # Crée et enregistre le service de notification
     notification_service = FreeSMSNotificationService(hass, username, access_token)
+
     async def handle_send_message(service_call: ServiceCall) -> None:
-        """Handle the service call to send a message."""
+        """Gère l'appel du service spécifique (notify.nom_service)."""
         data = dict(service_call.data)
         if "message" not in data:
-            _LOGGER.error("Missing required 'message' in service call data")
+            _LOGGER.error("Champ 'message' manquant dans les données du service")
             return
         message = data["message"]
         result = await notification_service.async_send_message(message)
-        hass.bus.async_fire(
-            f"{DOMAIN}_status_update",
-            result
-        )
+        hass.bus.async_fire(f"{DOMAIN}_status_update", result)
 
     hass.services.async_register(
         "notify",
         service_name,
         handle_send_message,
     )
-    _LOGGER.info("Registered notification service: notify.%s", service_name)
+    _LOGGER.info("Service de notification enregistré : notify.%s", service_name)
 
-    # Store the service name for unloading
+    # Enregistre le service générique freesmsxa.send_sms
+    async def handle_send_sms(call: ServiceCall) -> None:
+        """Gère l'envoi de SMS via le service générique."""
+        target = call.data.get("target")
+        message = call.data.get("message")
+
+        if not target or not message:
+            _LOGGER.error("Paramètres manquants: target=%s, message=%s", target, message)
+            return
+
+        if not hass.services.has_service("notify", target):
+            _LOGGER.error("Le service notify.%s n'existe pas", target)
+            return
+
+        await hass.services.async_call(
+            "notify",
+            target,
+            {"message": message},
+            blocking=True,
+        )
+
+    hass.services.async_register(
+        DOMAIN,
+        "send_sms",
+        handle_send_sms
+    )
+    _LOGGER.info("Service générique freesmsxa.send_sms enregistré")
+
+    # Stocke les données pour le déchargement
     hass.data[DOMAIN][entry.entry_id] = {
         "service_name": service_name,
     }
 
-    # Set up sensor platform
+    # Active la plateforme capteur
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload a config entry."""
+    """Décharge une entrée de configuration."""
     data = hass.data[DOMAIN].pop(entry.entry_id, {})
     service_name = data.get("service_name")
     if service_name:
         hass.services.async_remove("notify", service_name)
-        _LOGGER.debug("Unregistered notification service: %s", service_name)
+        _LOGGER.debug("Service notify.%s désenregistré", service_name)
 
-    # Unload sensor platform
     await hass.config_entries.async_unload_platforms(entry, ["sensor"])
     return True
