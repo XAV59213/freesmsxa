@@ -1,59 +1,133 @@
-Free Mobile SMS XA pour Home Assistant
+# 📨 Free Mobile SMS XA – Intégration Home Assistant
 
-Free Mobile SMS XA est un composant personnalisé pour Home Assistant permettant d’envoyer des notifications par SMS via le service Free Mobile. Il prend en charge plusieurs lignes téléphoniques, avec des noms de services personnalisés et des capteurs de statut.
-🛠️ Installation
+![Logo](./images/logo.png)
 
-    Copiez le dossier custom_components/freesmsxa dans le répertoire custom_components/ de votre configuration Home Assistant.
+[![GitHub release](https://img.shields.io/github/v/release/XAV59213/freesmsxa)](https://github.com/XAV59213/freesmsxa/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?logo=home-assistant)](https://hacs.xyz/)
+[![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](./LICENSE)
 
-    Redémarrez Home Assistant.
+**Free Mobile SMS XA** est une intégration personnalisée pour [Home Assistant](https://www.home-assistant.io/) qui permet d’envoyer des notifications **par SMS** via l’API gratuite de Free Mobile. Elle prend en charge plusieurs lignes, crée des entités (capteurs, boutons, services `notify`) et offre une interface complète dans Lovelace.
 
-    Accédez à Paramètres > Appareils et services > Ajouter une intégration, puis recherchez Free Mobile SMS XA.
+---
 
-    Entrez votre identifiant Free Mobile, le jeton d'accès API SMS, et éventuellement un nom personnalisé pour le service de notification.
+## 🔧 Fonctionnalités
 
-    Répétez l’opération pour ajouter d’autres lignes téléphoniques si nécessaire.
+- 🔔 Envoi de SMS via `notify.nom_du_service`
+- 👥 Support **multi-utilisateurs** (ex : `Papa`, `Maman`)
+- 📊 Capteur de **statut enrichi** : nombre total de SMS, date du dernier envoi, journal
+- 🔘 Bouton test SMS personnalisable
+- 🧾 Historique des 10 derniers messages
+- 🎨 Carte Lovelace complète prête à l’emploi
+- 🧩 Intégration via l’interface graphique Home Assistant
 
-⚙️ Configuration
+---
 
-username: votre_identifiant_free_mobile
-access_token: votre_token_api_sms
-name: mon_telephone  # (facultatif) nom personnalisé du service
+## 📸 Aperçu
 
-    username : Votre identifiant Free Mobile.
+### 🛠 Interface de configuration
 
-    access_token : Votre jeton d’accès API pour les SMS.
+![Configuration UI](./images/Capture%20d’écran%20du%202025-05-02%2011-11-45.png)
 
-    name (optionnel) : Un nom personnalisé pour le service de notification (ex : "Mon Téléphone"). Les espaces et caractères spéciaux sont automatiquement convertis (ex : "Mon Téléphone" devient mon_telephone).
+### 🧩 Services configurés
 
-Chaque ligne téléphonique configurée génère :
+![Services configurés](./images/Capture%20d’écran%20du%202025-05-02%2011-12-06.png)
 
-    Un service de notification : notify.mon_telephone ou notify.freesmsxa_12345678.
+### 🔑 Interface Free Mobile (Clé API)
 
-    Une entité capteur : sensor.freesmsxa_12345678, affichant le statut de l’API, la date du dernier envoi et le nombre total de SMS envoyés.
+![Free Mobile Token](./images/token.png)
 
-📤 Utilisation
+---
 
-Utilisez le service dans une automatisation ou un script, par exemple :
+## 🧰 Installation
 
-service: notify.mon_telephone
-data:
-  message: "Notification test depuis Home Assistant"
+### 📦 Via HACS (recommandé)
 
-Vérifiez le capteur pour consulter le statut de l’API et d’autres attributs :
+1. Ouvre **HACS > Intégrations**
+2. Clique sur **les trois points > Dépôts personnalisés**
+3. Ajoute :  
+   ```
+   https://github.com/XAV59213/freesmsxa
+   ```
+4. Sélectionne la catégorie `Intégration`
+5. Installe **Free Mobile SMS XA**
+6. Redémarre Home Assistant
+7. Va dans **Paramètres > Appareils et services > Ajouter une intégration**
+8. Cherche `Free Mobile SMS XA` et ajoute une ligne
 
-entity_id: sensor.freesmsxa_12345678
-attributes:
-  last_sent: "2025-05-01T12:00:00"
-  sms_count: 5
+---
 
-📦 Dépendances
+## 🔐 Obtenir tes identifiants Free Mobile
 
-    Bibliothèque Python freesms version ≥ 0.2.1
+1. Connecte-toi à ton [espace abonné Free Mobile](https://mobile.free.fr/moncompte)
+2. Va dans **Gérer mes options**
+3. Active **Notifications par SMS**
+4. Copie ton **Identifiant utilisateur** et ta **Clé API**
 
-📄 Licence
+---
 
-Distribué sous licence GNU LGPL v2.1
-📚 Documentation
+## ⚙️ Exemple d’automatisation
 
-Pour plus de détails, consultez le dépôt GitHub.
+```yaml
+alias: Alerte Température Piscine
+trigger:
+  - platform: numeric_state
+    entity_id: sensor.temperature_eau
+    above: 30
+action:
+  - service: notify.papa_sms
+    data:
+      message: "⚠️ Température de la piscine trop élevée !"
+```
 
+---
+
+## 📊 Carte Lovelace personnalisée
+
+```yaml
+type: vertical-stack
+cards:
+  - type: entity
+    entity: sensor.free_mobile_sms_papa_sms_status
+    name: 📲 Papa - État SMS
+  - type: button
+    name: ✉️ Envoyer un test
+    entity: button.test_sms_12345678
+    tap_action:
+      action: call-service
+      service: button.press
+      target:
+        entity_id: button.test_sms_12345678
+  - type: markdown
+    title: 📝 Historique des SMS
+    content: >
+      {% set log = state_attr('sensor.free_mobile_sms_papa_sms_status', 'sms_log') %}
+      {% if log %}
+      {% for item in log %}
+      • **{{ item.time }}** : {{ item.message }}
+      {% endfor %}
+      {% else %}
+      Aucun SMS envoyé.
+      {% endif %}
+```
+
+---
+
+## 🛡️ Sécurité
+
+- ✅ Aucune donnée externe utilisée
+- ✅ Aucune collecte de messages
+- ✅ La Clé API est invisible après validation
+- ✅ 100 % local, 100 % Free Mobile
+
+---
+
+## 🧾 Licence
+
+Distribué sous **GNU LGPL v2.1** – [Voir la licence](./LICENSE)
+
+---
+
+## 📚 Documentation
+
+> Intégration créée avec ❤️ pour Home Assistant.  
+> Pour toute question ou amélioration, [ouvre une issue](https://github.com/XAV59213/freesmsxa/issues).
