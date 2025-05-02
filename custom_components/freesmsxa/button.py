@@ -12,16 +12,14 @@ from .const import DOMAIN
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    entry_id = entry.entry_id
-    async_add_entities([TestSMSButton(username, access_token, entry_id)])
+    async_add_entities([TestSMSButton(username, access_token)])
 
 class TestSMSButton(ButtonEntity):
-    def __init__(self, username: str, token: str, entry_id: str):
+    def __init__(self, username: str, token: str):
         self._username = username
         self._token = token
-        self._entry_id = entry_id
         self._attr_name = f"Test SMS ({username})"
-        self._attr_unique_id = f"freesmsxa_test_button_{entry_id}"
+        self._attr_unique_id = f"freesmsxa_{username}_test_button"
         self._attr_icon = "mdi:message-alert-outline"
 
     @property
