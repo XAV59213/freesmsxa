@@ -36,14 +36,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         manufacturer="Free Mobile",
         model="SMS Gateway",
         sw_version="1.0",
-        entry_type=DeviceEntryType.SERVICE,
-        user_id=entry.pref_provided_user
+        entry_type=DeviceEntryType.SERVICE
     )
 
-    await hass.config_entries.async_forward_entry_setups(entry, ["notify", "sensor"])
+    await hass.config_entries.async_forward_entry_setups(entry, ["notify", "sensor", "button"])
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    await hass.config_entries.async_unload_platforms(entry, ["notify", "sensor"])
+    await hass.config_entries.async_unload_platforms(entry, ["notify", "sensor", "button"])
     hass.data[DOMAIN].pop(entry.entry_id)
     return True
