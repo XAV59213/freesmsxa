@@ -17,23 +17,30 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None) -> FlowResult:
         errors = {}
         if user_input is not None:
-            try:
-                client = FreeClient(user_input[CONF_USERNAME], user_input[CONF_ACCESS_TOKEN])
-                response = await self.hass.async_add_executor_job(
-                    client.send_sms, "Test Free Mobile SMS XA"
-                )
-                if response.status_code == HTTPStatus.FORBIDDEN:
-                    errors["base"] = "invalid_auth"
-                elif response.status_code != HTTPStatus.OK:
-                    errors["base"] = "api_error"
-                else:
-                    return self.async_create_entry(
-                        title=user_input.get(CONF_NAME, user_input[CONF_USERNAME]),
-                        data=user_input,
-                        options={"test_message": "Test SMS envoyé depuis Home Assistant"},
+            # Empêcher doublon de compte déjà configuré
+            for entry in self._async_current_entries():
+                if entry.data.get(CONF_USERNAME) == user_input[CONF_USERNAME]:
+                    errors["username"] = "account_already_configured"
+                    break
+
+            if not errors:
+                try:
+                    client = FreeClient(user_input[CONF_USERNAME], user_input[CONF_ACCESS_TOKEN])
+                    response = await self.hass.async_add_executor_job(
+                        client.send_sms, "Configuration du compte OK"
                     )
-            except Exception:
-                errors["base"] = "connection_error"
+                    if response.status_code == HTTPStatus.FORBIDDEN:
+                        errors["base"] = "invalid_auth"
+                    elif response.status_code != HTTPStatus.OK:
+                        errors["base"] = "api_error"
+                    else:
+                        return self.async_create_entry(
+                            title=user_input.get(CONF_NAME, user_input[CONF_USERNAME]),
+                            data=user_input,
+                            options={"test_message": "Test SMS envoyé depuis Home Assistant"},
+                        )
+                except Exception:
+                    errors["base"] = "connection_error"
 
         return self.async_show_form(
             step_id="user",
