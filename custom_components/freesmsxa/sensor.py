@@ -25,7 +25,8 @@ def update_sensor_state(hass: HomeAssistant, username: str):
 
 class FreeSMSSensor(SensorEntity):
     def __init__(self, entry_id: str, username: str, phone_number: str | None, alias: str):
-        self._attr_name = f"Free Mobile SMS {alias} Status"
+        self._attr_has_entity_name = True
+        self._attr_name = f"{alias} - État SMS"
         self._attr_unique_id = f"freesmsxa_{entry_id}_status"
         self._attr_icon = "mdi:message-text"
         self._username = username
