@@ -30,6 +30,7 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=user_input.get(CONF_NAME, user_input[CONF_USERNAME]),
                         data=user_input,
+                        options={"test_message": "Test SMS envoyé depuis Home Assistant"},
                     )
             except Exception:
                 errors["base"] = "connection_error"
@@ -61,7 +62,6 @@ class FreeSMSOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
-                vol.Optional(CONF_NAME, default=self.config_entry.data.get(CONF_NAME, "")): str,
-                vol.Optional(CONF_PHONE_NUMBER, default=self.config_entry.data.get(CONF_PHONE_NUMBER, "")): str,
+                vol.Optional("test_message", default=self.config_entry.options.get("test_message", "")): str
             })
         )

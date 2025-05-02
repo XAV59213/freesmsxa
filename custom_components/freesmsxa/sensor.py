@@ -19,9 +19,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     sensors[username] = sensor
     async_add_entities([sensor])
 
-def update_sensor_state(hass: HomeAssistant, username: str):
+def update_sensor_state(hass: HomeAssistant, username: str, message: str = ""):
     if username in sensors:
-        sensors[username].notify_sent()
+        sensors[username].notify_sent(message)
 
 class FreeSMSSensor(SensorEntity):
     def __init__(self, entry_id: str, username: str, phone_number: str | None, alias: str):
@@ -34,15 +34,9 @@ class FreeSMSSensor(SensorEntity):
         self._phone_number = phone_number
         self._sms_count = 0
         self._last_sent = None
+        self._sms_log = []
         self._state = "Idle"
-
-        self._attr_extra_state_attributes = {
-            "sms_count": self._sms_count,
-            "last_sent": self._last_sent,
-            "alias": self._alias,
-            "username": self._username,
-            "phone_number": self._phone_number or "Non renseigné",
-        }
+        self._attr_extra_state_attributes = {}
 
     @property
     def device_info(self):
@@ -58,12 +52,18 @@ class FreeSMSSensor(SensorEntity):
     def state(self):
         return self._state
 
-    def notify_sent(self):
+    def notify_sent(self, message=""):
         self._sms_count += 1
         self._last_sent = datetime.now().isoformat()
+        self._sms_log.insert(0, {"message": message or "SMS envoyé", "time": self._last_sent})
+        self._sms_log = self._sms_log[:10]  # garder les 10 derniers
         self._state = "Last sent"
-        self._attr_extra_state_attributes.update({
+        self._attr_extra_state_attributes = {
             "sms_count": self._sms_count,
             "last_sent": self._last_sent,
-        })
+            "alias": self._alias,
+            "username": self._username,
+            "phone_number": self._phone_number or "Non renseigné",
+            "sms_log": self._sms_log,
+        }
         self.async_write_ha_state()

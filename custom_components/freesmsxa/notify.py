@@ -50,7 +50,7 @@ class FreeSMSNotifyEntity(NotifyEntity):
             resp = await self.hass.async_add_executor_job(self.free_client.send_sms, message)
             if resp.status_code == HTTPStatus.OK:
                 _LOGGER.info("SMS sent for %s", self._username)
-                update_sensor_state(self.hass, self._username)
+                update_sensor_state(self.hass, self._username, message)
             else:
                 _LOGGER.warning("Failed to send SMS to %s (%s)", self._username, resp.status_code)
         except Exception as exc:
