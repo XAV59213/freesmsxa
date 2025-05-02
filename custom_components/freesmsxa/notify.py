@@ -5,27 +5,34 @@ import logging
 from http import HTTPStatus
 
 from freesms import FreeClient
-from homeassistant.components.notify import BaseNotificationService
+from homeassistant.components.notify import BaseNotificationService, NotifyEntity
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.typing import DiscoveryInfoType
-
+from homeassistant.config_entries import ConfigEntry
 from .const import DOMAIN
 from .sensor import update_sensor_state
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_get_service(hass: HomeAssistant, config: dict, discovery_info: DiscoveryInfoType | None = None) -> BaseNotificationService:
-    if discovery_info is None:
-        return None
-    entry_id = discovery_info["entry_id"]
-    data = hass.data[DOMAIN][entry_id]
-    return FreeSMSNotificationService(hass, data["username"], data["access_token"])
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities) -> None:
+    """Set up notify entity for FreeSMSXA."""
+    username = entry.data[CONF_USERNAME]
+    access_token = entry.data[CONF_ACCESS_TOKEN]
+    async_add_entities([FreeSMSNotificationEntity(hass, username, access_token)])
 
-class FreeSMSNotificationService(BaseNotificationService):
+class FreeSMSNotificationEntity(NotifyEntity):
+    """Notification entity for Free Mobile SMS."""
+
     def __init__(self, hass: HomeAssistant, username: str, access_token: str) -> None:
         self.hass = hass
-        self.free_client = FreeClient(username, access_token)
         self._username = username
+        self._access_token = access_token
+        self.free_client = FreeClient(username, access_token)
+        self._attr_name = f"Free Mobile SMS ({username})"
+
+    @property
+    def unique_id(self) -> str:
+        return f"freesmsxa_notify_{self._username}"
 
     @property
     def device_info(self):
@@ -37,10 +44,10 @@ class FreeSMSNotificationService(BaseNotificationService):
             "sw_version": "1.0",
         }
 
-    def send_message(self, message: str = "", **kwargs) -> None:
+    async def async_send_message(self, message: str = "", **kwargs) -> None:
         _LOGGER.debug("Sending SMS to %s: %s", self._username, message)
         try:
-            resp = self.free_client.send_sms(message)
+            resp = await self.hass.async_add_executor_job(self.free_client.send_sms, message)
             if resp.status_code == HTTPStatus.OK:
                 _LOGGER.info("SMS sent for %s", self._username)
                 update_sensor_state(self.hass, self._username)
