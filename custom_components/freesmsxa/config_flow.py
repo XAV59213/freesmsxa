@@ -4,7 +4,7 @@ from __future__ import annotations
 import voluptuous as vol
 from http import HTTPStatus
 from homeassistant import config_entries
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_USERNAME
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from freesms import FreeClient
@@ -35,7 +35,7 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         errors["base"] = "api_error"
                     else:
                         return self.async_create_entry(
-                            title=user_input[CONF_USERNAME],
+                            title=user_input.get(CONF_NAME, user_input[CONF_USERNAME]),
                             data=user_input,
                             options={"test_message": "Test SMS envoyé depuis Home Assistant"},
                         )
@@ -47,6 +47,7 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required(CONF_USERNAME): str,
                 vol.Required(CONF_ACCESS_TOKEN): str,
+                vol.Optional(CONF_NAME): str,
                 vol.Optional(CONF_PHONE_NUMBER): str,
             }),
             errors=errors,

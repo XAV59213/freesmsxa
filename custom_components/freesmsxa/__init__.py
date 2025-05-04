@@ -3,7 +3,7 @@
 import logging
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry, DeviceEntryType
@@ -53,8 +53,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     username = entry.data["username"]
     token = mask_token(entry.data["access_token"])
     phone = entry.data.get(CONF_PHONE_NUMBER, "inconnu")
+    alias = entry.data.get(CONF_NAME, username)
 
-    device_name = f"Free Mobile SMS ({username}) – Token: {token} – Tel: {phone}"
+    device_name = f"{alias} – Token: {token} – Tel: {phone}"
 
     device_registry = async_get_device_registry(hass)
     device_registry.async_get_or_create(

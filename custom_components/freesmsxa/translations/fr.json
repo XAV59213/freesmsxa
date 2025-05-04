@@ -37,12 +37,5 @@
         }
       }
     }
-  },
-  "entity": {
-    "notify": {
-      "notify_entity": {
-        "name": "SMS {username}"
-      }
-    }
   }
 }
