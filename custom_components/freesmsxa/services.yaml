@@ -4,15 +4,15 @@ send_sms:
   fields:
     target:
       name: Service cible
-      description: Nom du service notify (ex : mon_telephone).
+      description: Nom du service notify (ex : notify.mon_telephone).
       required: true
-      example: mon_telephone
+      example: notify.mon_telephone
       selector:
-        text: null
+        text:
     message:
       name: Message
       description: Message texte à envoyer.
       required: true
       example: Piscine hors gel !
       selector:
-        text: null
+        text:
