@@ -19,6 +19,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Validate YAML syntax
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+          yamllint .github/workflows/hassfest.yaml
+      - name: Debug directory structure
+        run: |
+          ls -R
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
