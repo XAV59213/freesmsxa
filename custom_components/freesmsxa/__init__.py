@@ -4,7 +4,7 @@ import logging
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry, DeviceEntryType
 
@@ -18,6 +18,25 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Free Mobile SMS XA integration."""
     hass.data.setdefault(DOMAIN, {})
+
+    async def handle_send_sms(call: ServiceCall) -> None:
+        """Handle the send_sms service call."""
+        target = call.data.get("target")
+        message = call.data.get("message")
+        if not target or not message:
+            _LOGGER.error("Missing target or message in send_sms service call")
+            return
+        if target not in hass.services.services.get("notify", {}):
+            _LOGGER.error("Invalid notify service: %s", target)
+            return
+        try:
+            await hass.services.async_call("notify", target, {"message": message})
+            _LOGGER.info("SMS sent via %s: %s", target, message)
+        except Exception as exc:
+            _LOGGER.error("Failed to send SMS via %s: %s", target, exc)
+
+    # Register the send_sms service
+    hass.services.async_register(DOMAIN, "send_sms", handle_send_sms)
     return True
 
 def mask_token(token):
