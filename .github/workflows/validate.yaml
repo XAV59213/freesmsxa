@@ -8,32 +8,14 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
   validate-hacs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Validate YAML syntax
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y yamllint
-          yamllint .github/workflows/validate.yaml
-      - name: Debug directory structure
-        run: |
-          ls -R
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install freesms>=0.2.1 || echo "Dépendance freesms non trouvée"
+
       - name: HACS validation
-        uses: hacs/action@v0.2.0
+        uses: hacs/action@main
         with:
           category: "integration"
