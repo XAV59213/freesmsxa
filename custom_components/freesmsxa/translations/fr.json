@@ -21,5 +21,21 @@
       "api_error": "Erreur lors de la communication avec l'API Free Mobile.",
       "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678)."
     }
+  },
+  "services": {
+    "send_sms": {
+      "service_name": "Envoyer un SMS",
+      "service_description": "Envoie un SMS via un service notify configuré.",
+      "fields": {
+        "target": {
+          "target_name": "Service cible",
+          "target_description": "Nom du service notify (ex : notify.mon_telephone)."
+        },
+        "message": {
+          "message_name": "Message",
+          "message_description": "Message texte à envoyer."
+        }
+      }
+    }
   }
 }
