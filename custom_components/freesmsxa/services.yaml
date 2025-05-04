@@ -1,17 +1,17 @@
 send_sms:
-  name: Envoyer un SMS
-  description: Envoie un SMS via un service notify configuré.
+  name: service_name
+  description: service_description
   fields:
     target:
-      name: Service cible
-      description: Nom du service notify (ex : notify.mon_telephone).
+      name: target_name
+      description: target_description
       required: true
       example: notify.mon_telephone
       selector:
         text:
     message:
-      name: Message
-      description: Message texte à envoyer.
+      name: message_name
+      description: message_description
       required: true
       example: Piscine hors gel !
       selector:
