@@ -5,7 +5,7 @@ from http import HTTPStatus
 
 from homeassistant.components.notify import NotifyEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 from .sensor import update_sensor_state
@@ -16,20 +16,18 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    alias = entry.data.get(CONF_NAME, username).lower()  # Normaliser en minuscules
     async_add_entities([
-        FreeSMSNotifyEntity(hass, username, access_token, alias)
+        FreeSMSNotifyEntity(hass, username, access_token)
     ])
 
 class FreeSMSNotifyEntity(NotifyEntity):
-    def __init__(self, hass: HomeAssistant, username: str, access_token: str, alias: str):
+    def __init__(self, hass: HomeAssistant, username: str, access_token: str):
         self.hass = hass
         self._username = username
         self._access_token = access_token
-        self._alias = alias
         self.free_client = FreeClient(username, access_token)
-        self._attr_name = f"{self._alias}_sms"  # Génère un nom comme "papa_sms"
-        self._attr_translation_key = self._alias  # Utilise l'alias comme clé de traduction (ex: "papa")
+        self._attr_name = f"{self._username}_sms"  # Nom du service basé sur username, ex: "papa123_sms"
+        self._attr_translation_key = "notify_entity"  # Clé de traduction générique
 
     @property
     def unique_id(self) -> str:
@@ -39,10 +37,16 @@ class FreeSMSNotifyEntity(NotifyEntity):
     def device_info(self):
         return {
             "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
-            "name": f"Free Mobile SMS ({self._alias})",
+            "name": f"Free Mobile SMS ({self._username})",
             "manufacturer": "Free Mobile",
             "model": "SMS Gateway",
             "sw_version": "1.0",
+        }
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            "username": self._username
         }
 
     async def async_send_message(self, message: str = "", **kwargs) -> None:
