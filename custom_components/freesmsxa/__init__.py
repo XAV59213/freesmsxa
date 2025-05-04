@@ -1,14 +1,19 @@
 """Init for Free Mobile SMS XA."""
 
 import logging
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.device_registry import async_get as async_get_device_registry, DeviceEntryType
 
 from .const import DOMAIN, CONF_PHONE_NUMBER
 
 _LOGGER = logging.getLogger(__name__)
+
+# Define config schema to indicate the integration only supports config entries
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Free Mobile SMS XA integration."""
