@@ -16,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     username = entry.data[CONF_USERNAME]
     access_token = entry.data[CONF_ACCESS_TOKEN]
-    alias = entry.data.get(CONF_NAME, username)
+    alias = entry.data.get(CONF_NAME, username).lower()  # Normaliser en minuscules
     async_add_entities([
         FreeSMSNotifyEntity(hass, username, access_token, alias)
     ])
@@ -28,7 +28,8 @@ class FreeSMSNotifyEntity(NotifyEntity):
         self._access_token = access_token
         self._alias = alias
         self.free_client = FreeClient(username, access_token)
-        self._attr_name = alias
+        self._attr_name = f"{self._alias}_sms"  # Génère un nom comme "papa_sms"
+        self._attr_translation_key = self._alias  # Utilise l'alias comme clé de traduction (ex: "papa")
 
     @property
     def unique_id(self) -> str:
