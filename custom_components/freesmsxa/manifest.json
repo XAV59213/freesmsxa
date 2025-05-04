@@ -1,12 +1,12 @@
 {
   "domain": "freesmsxa",
   "name": "Free Mobile SMS XA",
-  "version": "4.5.0",
-  "documentation": "https://github.com/XAV59213/freesmsxa",
-  "issue_tracker": "https://github.com/XAV59213/freesmsxa/issues",
-  "requirements": ["freesms>=0.2.1"],
-  "dependencies": [],
   "codeowners": ["@XAV59213"],
   "config_flow": true,
-  "iot_class": "cloud_push"
+  "dependencies": [],
+  "documentation": "https://github.com/XAV59213/freesmsxa",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/XAV59213/freesmsxa/issues",
+  "requirements": ["freesms>=0.2.1"],
+  "version": "4.5.0"
 }
