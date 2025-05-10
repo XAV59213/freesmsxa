@@ -1,0 +1,10 @@
+"""Constantes pour Piscinexa."""
+DOMAIN = "piscinexa"
+POOL_TYPE_SQUARE = "square"
+POOL_TYPE_ROUND = "round"
+PI = 3.141592653589793
+UNIT_CUBIC_METERS = "m³"
+UNIT_HOURS = "h"
+UNIT_LITERS = "L"
+UNIT_GRAMS = "g"
+UNIT_MG_PER_LITER = "mg/L"

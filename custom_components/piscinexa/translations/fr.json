@@ -1,0 +1,478 @@
+{
+  "title": "Piscinexa - Configuration",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Étape 1 - Configuration initiale",
+        "description": "Bienvenue dans la configuration de Piscinexa ! Commençons par définir les informations de base de votre piscine.\n\n- Entrez un nom unique pour votre piscine.\n- Sélectionnez le type de piscine (carrée ou ronde).",
+        "data": {
+          "name": "Nom de la piscine",
+          "pool_type": "Type de piscine",
+          "pool_type_square": "Carrée",
+          "pool_type_round": "Ronde"
+        }
+      },
+      "dimensions": {
+        "title": "Étape 2 - Dimensions de la piscine",
+        "description": "Entrez les dimensions de votre piscine pour calculer son volume.\n\n- Si votre piscine est carrée, indiquez la longueur, la largeur et la profondeur.\n- Si votre piscine est ronde, indiquez le diamètre et la profondeur.\n\nLes valeurs doivent être en mètres.",
+        "data": {
+          "length": "Longueur (mètres)",
+          "width": "Largeur (mètres)",
+          "depth": "Profondeur (mètres)",
+          "diameter": "Diamètre (mètres)"
+        }
+      },
+      "ph_config": {
+        "title": "Étape 3 - Configuration du capteur pH",
+        "description": "Choisissez comment configurer le pH de votre piscine.\n\n- **Saisie manuelle** : Entrez les valeurs actuelles mesurées et cibles du pH.\n- **Sélectionner un capteur** : Utilisez un capteur existant pour mesurer le pH actuel.",
+        "data": {
+          "ph_config_choice": "Méthode de configuration du pH",
+          "manual": "Saisie manuelle",
+          "sensor": "Sélectionner un capteur"
+        }
+      },
+      "ph_manual": {
+        "title": "Étape 3 - Saisie manuelle du pH",
+        "description": "Entrez les valeurs du pH pour votre piscine.\n\n- **pH actuel (mesuré)** : Le pH actuel de votre piscine, mesuré manuellement (facultatif).\n- **pH cible (idéal)** : Le pH idéal que vous souhaitez atteindre (requis, généralement entre 7.2 et 7.6 pour une piscine).",
+        "no_sensor_ph": "Piscinexa n'a pas trouvé de capteur pH compatible. Vous devez configurer les valeurs manuellement.",
+        "data": {
+          "ph_current": "pH actuel (mesuré)",
+          "ph_target": "pH cible (idéal)"
+        }
+      },
+      "ph_sensor": {
+        "title": "Étape 3 - Sélectionner un capteur pH",
+        "description": "Sélectionnez un capteur pour mesurer le pH actuel de votre piscine et définissez la valeur cible idéale.\n\n- **Capteur pH** : Choisissez un capteur existant dans votre système (facultatif, sélectionnez 'Aucun capteur' pour passer).\n- **pH cible (idéal)** : Le pH idéal que vous souhaitez atteindre (requis, généralement entre 7.2 et 7.6 pour une piscine).",
+        "data": {
+          "ph_sensor": "Capteur pH",
+          "ph_target": "pH cible (idéal)",
+          "no_sensor": "Aucun capteur (saisie manuelle)"
+        }
+      },
+      "confirm_ph_sensor": {
+        "title": "Étape 3 - Confirmation pH",
+        "description": "Aucun capteur pH n'a été sélectionné, et aucune valeur manuelle n'est disponible. Que souhaitez-vous faire ?",
+        "data": {
+          "confirm_choice": "Choix",
+          "manual": "Saisir manuellement",
+          "retry": "Réessayer la sélection du capteur"
+        }
+      },
+      "chlore_config": {
+        "title": "Étape 4 - Configuration du capteur chlore",
+        "description": "Choisissez comment configurer le chlore de votre piscine.\n\n- **Saisie manuelle** : Entrez les valeurs actuelles mesurées et cibles du chlore.\n- **Sélectionner un capteur** : Utilisez un capteur existant pour mesurer le chlore actuel.",
+        "data": {
+          "chlore_config_choice": "Méthode de configuration du chlore",
+          "manual": "Saisie manuelle",
+          "sensor": "Sélectionner un capteur"
+        }
+      },
+      "chlore_manual": {
+        "title": "Étape 4 - Saisie manuelle du chlore",
+        "description": "Entrez les valeurs du chlore pour votre piscine.\n\n- **Chlore actuel (mesuré, mg/L)** : Le niveau actuel de chlore dans votre piscine, mesuré manuellement (facultatif).\n- **Chlore cible (idéal, mg/L)** : Le niveau idéal de chlore que vous souhaitez atteindre (requis, généralement entre 1 et 3 mg/L pour une piscine).",
+        "no_sensor_chlore": "Piscinexa n'a pas trouvé de capteur chlore compatible. Vous devez configurer les valeurs manuellement.",
+        "data": {
+          "chlore_current": "Chlore actuel (mesuré, mg/L)",
+          "chlore_target": "Chlore cible (idéal, mg/L)"
+        }
+      },
+      "chlore_sensor": {
+        "title": "Étape 4 - Sélectionner un capteur chlore",
+        "description": "Sélectionnez un capteur pour mesurer le niveau actuel de chlore dans votre piscine et définissez la valeur cible idéale.\n\n- **Capteur chlore** : Choisissez un capteur existant dans votre système (facultatif, sélectionnez 'Aucun capteur' pour passer).\n- **Chlore cible (idéal, mg/L)** : Le niveau idéal de chlore que vous souhaitez atteindre (requis, généralement entre 1 et 3 mg/L pour une piscine).",
+        "data": {
+          "chlore_sensor": "Capteur chlore",
+          "chlore_target": "Chlore cible (idéal, mg/L)",
+          "no_sensor": "Aucun capteur (saisie manuelle)"
+        }
+      },
+      "confirm_chlore_sensor": {
+        "title": "Étape 4 - Confirmation chlore",
+        "description": "Aucun capteur chlore n'a été sélectionné, et aucune valeur manuelle n'est disponible. Que souhaitez-vous faire ?",
+        "data": {
+          "confirm_choice": "Choix",
+          "manual": "Saisir manuellement",
+          "retry": "Réessayer la sélection du capteur"
+        }
+      },
+      "temperature_config": {
+        "title": "Étape 5 - Configuration du capteur température",
+        "description": "Choisissez comment configurer la température de votre piscine.\n\n- **Saisie manuelle** : Entrez la température actuelle mesurée de votre piscine.\n- **Sélectionner un capteur** : Utilisez un capteur existant pour mesurer la température actuelle.",
+        "data": {
+          "temperature_config_choice": "Méthode de configuration de la température",
+          "manual": "Saisie manuelle",
+          "sensor": "Sélectionner un capteur"
+        }
+      },
+      "temperature_manual": {
+        "title": "Étape 5 - Saisie manuelle de la température",
+        "description": "Entrez la température actuelle mesurée de votre piscine.\n\n- **Température actuelle (°C)** : La température actuelle de l'eau, mesurée manuellement (facultatif).",
+        "no_sensor_temperature": "Piscinexa n'a pas trouvé de capteur température compatible. Vous devez configurer les valeurs manuellement.",
+        "data": {
+          "temperature": "Température actuelle (°C)"
+        }
+      },
+      "temperature_sensor": {
+        "title": "Étape 5 - Sélectionner un capteur température",
+        "description": "Sélectionnez un capteur pour mesurer la température actuelle de votre piscine.\n\n- **Capteur température** : Choisissez un capteur existant dans votre système (facultatif, sélectionnez 'Aucun capteur' pour passer).",
+        "data": {
+          "temperature_sensor": "Capteur température",
+          "no_sensor": "Aucun capteur (saisie manuelle)"
+        }
+      },
+      "confirm_temperature_sensor": {
+        "title": "Étape 5 - Confirmation température",
+        "description": "Aucun capteur température n'a été sélectionné, et aucune valeur manuelle n'est disponible. Que souhaitez-vous faire ?",
+        "data": {
+          "confirm_choice": "Choix",
+          "manual": "Saisir manuellement",
+          "retry": "Réessayer la sélection du capteur"
+        }
+      },
+      "power_config": {
+        "title": "Étape 6 - Configuration du capteur puissance",
+        "description": "Choisissez si vous souhaitez utiliser un capteur pour mesurer la consommation de puissance de votre piscine ou laisser ce champ vide.\n\n- **Saisie manuelle** : Laissez ce champ vide.\n- **Sélectionner un capteur** : Entrez l'ID d’un capteur existant pour mesurer la consommation de puissance.",
+        "data": {
+          "power_config_choice": "Méthode de configuration de la puissance",
+          "manual": "Manuel (aucun capteur)",
+          "sensor": "Sélectionner un capteur"
+        }
+      },
+      "power_manual": {
+        "title": "Étape 6 - Saisie manuelle de la puissance",
+        "description": "Aucun capteur de puissance ne sera utilisé.",
+        "no_sensor_power": "Piscinexa n'a pas trouvé de capteur puissance compatible. Poursuite sans capteur.",
+        "data": {}
+      },
+      "power_sensor": {
+        "title": "Étape 6 - Sélectionner un capteur puissance",
+        "description": "Entrez l'ID de l'entité du capteur pour mesurer la consommation de puissance.\n\n- **ID de l'entité du capteur de puissance** : Indiquez l’ID exact de l’entité (facultatif, laissez vide pour passer, par exemple, sensor.piscine_power).",
+        "data": {
+          "power_sensor_entity_id": "ID de l'entité du capteur de puissance"
+        }
+      },
+      "confirm_power_sensor": {
+        "title": "Étape 6 - Confirmation puissance",
+        "description": "Aucun capteur puissance n'a été sélectionné. Que souhaitez-vous faire ?",
+        "data": {
+          "confirm_choice": "Choix",
+          "manual": "Poursuivre sans capteur",
+          "retry": "Réessayer la sélection du capteur"
+        }
+      },
+      "treatment_config": {
+        "title": "Étape 7 - Configuration des types de traitements",
+        "description": "Sélectionnez les types de traitements chimiques utilisés pour votre piscine.",
+        "data": {
+          "ph_plus_treatment": "Type de traitement pH+",
+          "ph_minus_treatment": "Type de traitement pH-",
+          "chlore_treatment": "Type de traitement chlore",
+          "ph_plus_treatment_liquid": "Liquide",
+          "ph_plus_treatment_granules": "Granulés",
+          "ph_minus_treatment_liquid": "Liquide",
+          "ph_minus_treatment_granules": "Granulés",
+          "chlore_treatment_liquid": "Liquide",
+          "chlore_treatment_shock": "Chlore choc (poudre)",
+          "chlore_treatment_tablet": "Pastille à dissolution lente"
+        }
+      },
+      "summary": {
+        "title": "Étape 8 - Récapitulatif",
+        "description": "Voici un récapitulatif de votre configuration. Vérifiez les détails avant de confirmer.\n\n{summary}",
+        "data": {},
+        "labels": {
+          "pool_name": "Nom de la piscine",
+          "pool_type": "Type de piscine",
+          "pool_type_square": "Carrée",
+          "pool_type_round": "Ronde",
+          "dimensions": "Dimensions",
+          "ph_current": "pH actuel",
+          "ph_target": "pH cible",
+          "ph_source": "Source pH",
+          "ph_plus_treatment": "Type de traitement pH+",
+          "ph_minus_treatment": "Type de traitement pH-",
+          "chlore_current": "Chlore actuel",
+          "chlore_target": "Chlore cible",
+          "chlore_source": "Source chlore",
+          "chlore_treatment": "Type de traitement chlore",
+          "temperature": "Température",
+          "temperature_source": "Source température",
+          "power_source": "Source puissance",
+          "sensor": "Capteur",
+          "manual": "Manuel",
+          "no_selection": "Non sélectionné",
+          "not_defined": "Non défini",
+          "unit_mg_per_liter": "mg/L",
+          "unit_degrees_celsius": "°C"
+        }
+      },
+      "init": {
+        "title": "Options de Piscinexa",
+        "description": "Ajustez les paramètres cibles de votre piscine.\n\n- **pH cible** : La valeur idéale de pH que vous souhaitez atteindre.\n- **Chlore cible** : Le niveau idéal de chlore que vous souhaitez atteindre (mg/L).\n- **Capteurs** : Sélectionnez ou mettez à jour les capteurs utilisés pour mesurer le pH, le chlore et la température.",
+        "data": {
+          "ph_target": "pH cible (idéal)",
+          "chlore_target": "Chlore cible (idéal, mg/L)",
+          "temperature_sensor": "Capteur température",
+          "chlore_sensor": "Capteur chlore",
+          "ph_sensor": "Capteur pH",
+          "no_sensor_temperature": "Aucun capteur température",
+          "no_sensor_chlore": "Aucun capteur chlore",
+          "no_sensor_ph": "Aucun capteur pH"
+        }
+      }
+    },
+    "error": {
+      "name_invalid": "Nom invalide (ne peut pas être vide).",
+      "name_duplicate": "Ce nom est déjà utilisé par une autre piscine.",
+      "ph_invalid": "Valeur de pH invalide (doit être entre 0 et 14).",
+      "ph_required_if_no_sensor": "Une valeur de pH actuel est requise si aucun capteur pH n'est sélectionné.",
+      "sensor_required_if_no_ph": "Un capteur pH est requis si aucune valeur de pH actuel n'est fournie.",
+      "chlore_invalid": "Valeur de chlore invalide (doit être supérieure ou égale à 0).",
+      "chlore_required_if_no_sensor": "Une valeur de chlore actuel est requise si aucun capteur chlore n'est sélectionné.",
+      "sensor_required_if_no_chlore": "Un capteur chlore est requis si aucune valeur de chlore actuel n'est fournie.",
+      "temperature_invalid": "Température invalide (doit être entre 0 et 50 °C).",
+      "dimensions_invalid": "Dimensions invalides (doivent être supérieures à 0).",
+      "required_field": "Ce champ est requis.",
+      "invalid_number": "Valeur numérique invalide.",
+      "unexpected_error": "Erreur inattendue lors de la configuration : {error}"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "piscinexa_volume_eau": {
+        "name": "Volume Eau",
+        "unit_of_measurement": "m³"
+      },
+      "piscinexa_tempsfiltration_recommande": {
+        "name": "Temps Filtration Recommandé",
+        "unit_of_measurement": "h"
+      },
+      "piscinexa_tempsfiltration_effectue": {
+        "name": "Temps Filtration Effectué",
+        "unit_of_measurement": "h"
+      },
+      "piscinexa_temperature": {
+        "name": "Température Eau",
+        "unit_of_measurement": "°C"
+      },
+      "piscinexa_ph": {
+        "name": "pH",
+        "unit_of_measurement": "mg/L"
+      },
+      "piscinexa_ph_plus_ajouter": {
+        "name": "pH+ à Ajouter",
+        "unit_of_measurement": "L"
+      },
+      "piscinexa_ph_minus_ajouter": {
+        "name": "pH- à Ajouter",
+        "unit_of_measurement": "L"
+      },
+      "piscinexa_ph_target": {
+        "name": "pH Cible",
+        "unit_of_measurement": "mg/L"
+      },
+      "piscinexa_chlore": {
+        "name": "Chlore",
+        "unit_of_measurement": "mg/L"
+      },
+      "piscinexa_chlore_target": {
+        "name": "Chlore Cible",
+        "unit_of_measurement": "mg/L"
+      },
+      "piscinexa_chloredifference": {
+        "name": "Différence Chlore",
+        "unit_of_measurement": "mg/L"
+      },
+      "piscinexa_chloreaajouter": {
+        "name": "Chlore à Ajouter",
+        "unit_of_measurement": "g",
+        "messages": {
+          "remove_chlorine": "Niveau de chlore trop élevé, envisagez de le réduire.",
+          "volume_unavailable": "Volume d'eau indisponible, impossible de calculer la dose.",
+          "temperature_unavailable": "Température indisponible, impossible de calculer la dose.",
+          "calculation_error": "Erreur lors du calcul de la dose de chlore."
+        }
+      },
+      "piscinexa_consopuissance": {
+        "name": "Consommation Puissance",
+        "unit_of_measurement": "W"
+      },
+      "piscinexa_log": {
+        "name": "Journal Piscine",
+        "default_value": "Aucune action"
+      },
+      "piscinexa_pool_state": {
+        "name": "État Piscine",
+        "states": {
+          "temperature_too_cold": "Température trop froide",
+          "temperature_too_hot": "Température trop chaude",
+          "temperature_ideal": "Température idéale",
+          "temperature_unavailable": "Température indisponible",
+          "chlore_too_low": "Chlore trop bas",
+          "chlore_too_high": "Chlore trop haut",
+          "chlore_ideal": "Chlore idéal",
+          "chlore_unavailable": "Chlore indisponible",
+          "ph_too_low": "pH trop bas",
+          "ph_too_high": "pH trop haut",
+          "ph_ideal": "pH idéal",
+          "ph_unavailable": "pH indisponible",
+          "filtration_insufficient": "Temps de filtration insuffisant",
+          "filtration_ideal": "Temps de filtration idéal",
+          "filtration_unavailable": "Temps de filtration indisponible",
+          "swimming_allowed": "Baignade autorisée",
+          "evaluation_error": "Erreur d'évaluation"
+        }
+      }
+    },
+    "button": {
+      "piscinexa_test": {
+        "name": "Tester"
+      },
+      "piscinexa_reset": {
+        "name": "Réinitialiser"
+      }
+    },
+    "input_number": {
+      "piscinexa_ph_current": {
+        "name": "pH Actuel"
+      },
+      "piscinexa_chlore_current": {
+        "name": "Chlore Actuel"
+      }
+    },
+    "input_select": {
+      "piscinexa_ph_plus_treatment": {
+        "name": "Traitement pH+",
+        "options": {
+          "liquid": "Liquide",
+          "granules": "Granulés"
+        }
+      },
+      "piscinexa_ph_minus_treatment": {
+        "name": "Traitement pH-",
+        "options": {
+          "liquid": "Liquide",
+          "granules": "Granulés"
+        }
+      },
+      "piscinexa_chlore_treatment": {
+        "name": "Traitement Chlore",
+        "options": {
+          "shock": "Chlore choc (poudre)",
+          "tablet": "Pastille à dissolution lente",
+          "liquid": "Liquide"
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "single_pool": {
+      "title": "Tableau de bord piscine",
+      "views": {
+        "piscine": {
+          "title": "Piscine"
+        }
+      },
+      "cards": {
+        "controls": {
+          "title": "Contrôles"
+        },
+        "manual_input": {
+          "title": "Saisie manuelle"
+        },
+        "treatment_choices": {
+          "title": "Choix des traitements"
+        },
+        "sensors": {
+          "title": "Capteurs"
+        },
+        "template_ph_plus": {
+          "no_adjustment": "Aucun ajustement nécessaire"
+        },
+        "template_ph_minus": {
+          "no_adjustment": "Aucun ajustement nécessaire"
+        }
+      }
+    },
+    "multi_pool": {
+      "title": "Tableau de bord Piscinexa",
+      "views": {
+        "piscinexa": {
+          "title": "Piscines"
+        }
+      },
+      "cards": {
+        "piscine_section": {
+          "title": "Piscine"
+        },
+        "spa_section": {
+          "title": "Piscine Spa"
+        },
+        "history_section": {
+          "title": "Historique pH / Chlore"
+        },
+        "manual_input": {
+          "title": "Saisie manuelle"
+        },
+        "template_ph_plus": {
+          "no_adjustment": "Aucun ajustement nécessaire"
+        },
+        "template_ph_minus": {
+          "no_adjustment": "Aucun ajustement nécessaire"
+        }
+      }
+    }
+  },
+  "services": {
+    "test_calcul": {
+      "description": "Déclenche un calcul de test pour la piscine spécifiée.",
+      "fields": {
+        "name": {
+          "description": "Le nom de la piscine à tester.",
+          "example": "papa"
+        }
+      }
+    },
+    "reset_valeurs": {
+      "description": "Réinitialise les valeurs de pH et de chlore de la piscine à leurs paramètres par défaut.",
+      "fields": {
+        "name": {
+          "description": "Le nom de la piscine à réinitialiser.",
+          "example": "papa"
+        }
+      }
+    },
+    "apply_treatment": {
+      "description": "Applique un traitement chimique à la piscine et met à jour les capteurs en conséquence.",
+      "fields": {
+        "name": {
+          "description": "Le nom de la piscine à laquelle appliquer le traitement.",
+          "example": "papa"
+        },
+        "treatment_type": {
+          "description": "Le type de traitement à appliquer (pH+, pH-, ou Chlore).",
+          "example": "Chlore"
+        },
+        "treatment_form": {
+          "description": "La forme du traitement (Liquide, Granulés, Chlore choc (poudre), ou Pastille à dissolution lente).",
+          "example": "Liquide"
+        },
+        "quantity": {
+          "description": "La quantité du traitement à appliquer (en litres, grammes ou unités selon la forme).",
+          "example": "5.0"
+        }
+      }
+    }
+  },
+  "logs": {
+    "chlore_target_missing": "chlore_target manquant, définition par défaut: {default_value}",
+    "ph_target_missing": "ph_target manquant, définition par défaut: {default_value}",
+    "test_calcul_called": "Service test_calcul appelé pour la piscine {name}",
+    "test_calcul_action": "Calcul de test effectué",
+    "reset_valeurs_called": "Service reset_valeurs appelé pour la piscine {name}",
+    "reset_valeurs_action": "Valeurs réinitialisées par défaut",
+    "apply_treatment_called": "Service apply_treatment appelé pour la piscine {name}: {treatment_type} ({treatment_form}), quantité: {quantity}",
+    "apply_treatment_action": "Traitement appliqué: {treatment_type} ({treatment_form}), quantité: {quantity}",
+    "platform_load_error": "Erreur de chargement de la plateforme: {error}",
+    "platform_unload_error": "Erreur de déchargement de la plateforme: {error}"
+  }
+}

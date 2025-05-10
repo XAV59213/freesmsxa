@@ -1,0 +1,12 @@
+{
+  "domain": "piscinexa",
+  "name": "Piscinexa",
+  "version": "1.0.11",
+  "documentation": "https://github.com/XAV59213/piscinexa",
+  "issue_tracker": "https://github.com/XAV59213/piscinexa/issues",
+  "dependencies": [],
+  "requirements": [],
+  "codeowners": ["@XAV59213"],
+  "config_flow": true,
+  "iot_class": "local_push"
+}
