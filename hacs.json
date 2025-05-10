@@ -1,7 +1,6 @@
 {
-  "name": "piscinexa",
+  "name": "Free Mobile SMS XA",
   "content_in_root": false,
-  "homeassistant": "2025.4.0",
-  "render_readme": true,
-  "hacs": "1.0.0"
+  "homeassistant": "2024.6.0",
+  "render_readme": true
 }
