@@ -80,15 +80,32 @@ Shortcut:
 ## ⚙️ Exemple d’automatisation
 
 ```yaml
-alias: Alerte Température Piscine
-trigger:
-  - platform: numeric_state
-    entity_id: sensor.temperature_eau
-    above: 30
-action:
-  - service: notify.papa_sms
+description: ""
+mode: single
+triggers:
+  - device_id: f9c723991602ba75c1b74953ce38b854
+    domain: alarm_control_panel
+    entity_id: 257d080f03fb6013a27d97ef9d37efec
+    type: armed_away
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    trigger: device
+conditions: []
+actions:
+  - action: notify.send_message
+    metadata: {}
     data:
-      message: "⚠️ Température de la piscine trop élevée !"
+      message: Alarme activer !
+    target:
+      entity_id:
+        - notify.maman
+        - notify.papa
+        - notify.xavier
+        - notify.naomie
+        - notify.anais
+
 ```
 
 ---
