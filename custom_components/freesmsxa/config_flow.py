@@ -3,6 +3,7 @@
 from __future__ import annotations
 import voluptuous as vol
 from http import HTTPStatus
+
 from homeassistant import config_entries
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_USERNAME
 from homeassistant.core import callback
@@ -10,6 +11,7 @@ from homeassistant.data_entry_flow import FlowResult
 from freesms import FreeClient
 
 from .const import DOMAIN, CONF_PHONE_NUMBER
+
 
 class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -55,12 +57,13 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
-        return FreeSMSOptionsFlowHandler(config_entry)
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry):
+        """Get the options flow for this handler."""
+        return FreeSMSOptionsFlowHandler()
+
 
 class FreeSMSOptionsFlowHandler(config_entries.OptionsFlow):
-    def __init__(self, config_entry: config_entries.ConfigEntry):
-        self.config_entry = config_entry
+    """Handle options flow for FreeSMS XA."""
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
@@ -69,6 +72,8 @@ class FreeSMSOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
-                vol.Optional("test_message", default=self.config_entry.options.get("test_message", "")): str
-            })
+                vol.Optional(
+                    "test_message", default=self.config_entry.options.get("test_message", "")
+                ): str
+            }),
         )
