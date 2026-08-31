@@ -1,0 +1,54 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Free Mobile SMS XA",
+        "description": "Enter your Free Mobile account credentials. A test SMS will be sent to validate them.",
+        "data": {
+          "username": "Free Mobile user ID",
+          "access_token": "API key",
+          "name": "Device name (optional)",
+          "phone_number": "Phone number (optional)"
+        }
+      }
+    },
+    "error": {
+      "account_already_configured": "This user ID is already configured.",
+      "username_already_configured": "This user ID is already configured.",
+      "service_name_already_configured": "This device name is already used.",
+      "invalid_service_name": "The device name is invalid.",
+      "invalid_auth": "Invalid credentials. Check your user ID and API key.",
+      "invalid_credentials": "Invalid credentials. Check your user ID and API key.",
+      "invalid_config": "Configuration error. Check your credentials.",
+      "api_error": "Error while communicating with the Free Mobile API.",
+      "connection_error": "Unable to reach the Free Mobile API.",
+      "invalid_phone_number": "Invalid phone number. Use a French format (e.g. +33612345678 or 0612345678)."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Free Mobile SMS XA options",
+        "data": {
+          "test_message": "Test SMS message"
+        }
+      }
+    }
+  },
+  "services": {
+    "send_sms": {
+      "name": "Send SMS",
+      "description": "Send an SMS via a configured notify service.",
+      "fields": {
+        "target": {
+          "name": "Target service",
+          "description": "Notify service name (e.g. notify.my_phone)."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Text message to send."
+        }
+      }
+    }
+  }
+}

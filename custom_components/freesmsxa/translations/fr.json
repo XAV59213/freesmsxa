@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Configurer Free Mobile SMS XA",
-        "description": "Entrez les identifiants de votre compte Free Mobile pour configurer une ligne téléphonique. Un SMS de test sera envoyé pour valider les identifiants.",
+        "description": "Entrez les identifiants de votre compte Free Mobile. Un SMS de test sera envoyé pour les valider.",
         "data": {
           "username": "Identifiant Free Mobile",
           "access_token": "Clé API",
@@ -13,27 +13,40 @@
       }
     },
     "error": {
+      "account_already_configured": "Cet identifiant est déjà configuré.",
       "username_already_configured": "Cet identifiant est déjà configuré.",
       "service_name_already_configured": "Ce nom d’appareil est déjà utilisé.",
-      "invalid_service_name": "Le nom de l’appareil contient des caractères invalides ou est vide après nettoyage.",
-      "invalid_credentials": "Identifiants incorrects, veuillez vérifier votre identifiant et votre clé API.",
-      "invalid_config": "Erreur de configuration, veuillez vérifier vos identifiants.",
+      "invalid_service_name": "Le nom de l’appareil est invalide.",
+      "invalid_auth": "Identifiants incorrects, vérifiez votre identifiant et votre clé API.",
+      "invalid_credentials": "Identifiants incorrects, vérifiez votre identifiant et votre clé API.",
+      "invalid_config": "Erreur de configuration, vérifiez vos identifiants.",
       "api_error": "Erreur lors de la communication avec l'API Free Mobile.",
+      "connection_error": "Impossible de joindre l'API Free Mobile.",
       "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678)."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options Free Mobile SMS XA",
+        "data": {
+          "test_message": "Message du SMS de test"
+        }
+      }
     }
   },
   "services": {
     "send_sms": {
-      "service_name": "Envoyer un SMS",
-      "service_description": "Envoie un SMS via un service notify configuré.",
+      "name": "Envoyer un SMS",
+      "description": "Envoie un SMS via un service notify configuré.",
       "fields": {
         "target": {
-          "target_name": "Service cible",
-          "target_description": "Nom du service notify (ex : notify.mon_telephone)."
+          "name": "Service cible",
+          "description": "Nom du service notify (ex : notify.mon_telephone)."
         },
         "message": {
-          "message_name": "Message",
-          "message_description": "Message texte à envoyer."
+          "name": "Message",
+          "description": "Message texte à envoyer."
         }
       }
     }
