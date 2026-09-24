@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FreeSMSConfigEntry
-from .helpers import async_send_sms_via_client, build_device_info
+from .helpers import async_send_and_record, build_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,8 +41,5 @@ class FreeSMSNotifyEntity(NotifyEntity):
     async def async_send_message(self, message: str = "", **kwargs) -> None:
         """Send an SMS and record it on the status sensor."""
         _LOGGER.debug("Sending SMS to %s: %s", self._username, message)
-        await async_send_sms_via_client(self.hass, self._entry.runtime_data.client, message)
-        sensor = getattr(self._entry.runtime_data, "sensor", None)
-        if sensor is not None:
-            sensor.notify_sent(message)
+        await async_send_and_record(self.hass, self._entry, message, source="notify")
         _LOGGER.info("SMS sent for %s", self._username)

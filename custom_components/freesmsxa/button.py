@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FreeSMSConfigEntry
 from .const import CONF_TEST_MESSAGE, DEFAULT_TEST_MESSAGE
-from .helpers import async_send_sms_via_client, build_device_info
+from .helpers import async_send_and_record, build_device_info
 
 
 async def async_setup_entry(
@@ -39,9 +39,6 @@ class TestSMSButton(ButtonEntity):
     async def async_press(self) -> None:
         """Send the current test message from options."""
         message = self._entry.options.get(CONF_TEST_MESSAGE, DEFAULT_TEST_MESSAGE)
-        await async_send_sms_via_client(self.hass, self._entry.runtime_data.client, message)
-        sensor = getattr(self._entry.runtime_data, "sensor", None)
-        if sensor is not None:
-            sensor.notify_sent(message)
+        await async_send_and_record(self.hass, self._entry, message, source="button")
         self._attr_icon = "mdi:check-circle-outline"
         self.async_write_ha_state()
