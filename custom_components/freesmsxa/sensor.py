@@ -1,63 +1,81 @@
 """Sensor for Free Mobile SMS XA."""
 
-from datetime import datetime
+from __future__ import annotations
+
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_USERNAME, CONF_NAME
+from homeassistant.const import CONF_NAME, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, CONF_PHONE_NUMBER
+from . import FreeSMSConfigEntry
+from .helpers import build_device_info
 
-sensors = {}
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
-    username = entry.data[CONF_USERNAME]
-    phone_number = entry.data.get(CONF_PHONE_NUMBER)
-    alias = entry.data.get(CONF_NAME, username)
-    sensor = FreeSMSSensor(entry.entry_id, username, phone_number, alias)
-    sensors[username] = sensor
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: FreeSMSConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the SMS status sensor."""
+    sensor = FreeSMSSensor(entry)
+    entry.runtime_data.sensor = sensor
     async_add_entities([sensor])
 
-def update_sensor_state(hass: HomeAssistant, username: str, message: str = ""):
-    if username in sensors:
-        sensors[username].notify_sent(message)
 
-class FreeSMSSensor(SensorEntity):
-    def __init__(self, entry_id: str, username: str, phone_number: str | None, alias: str):
-        self._attr_has_entity_name = True
-        self._attr_name = f"{alias} - État SMS"
-        self._attr_unique_id = f"freesmsxa_{entry_id}_status"
-        self._attr_icon = "mdi:message-text"
+class FreeSMSSensor(RestoreEntity, SensorEntity):
+    """Status sensor that tracks sent SMS."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "sms_status"
+    _attr_icon = "mdi:message-text"
+    _attr_should_poll = False
+
+    def __init__(self, entry: FreeSMSConfigEntry) -> None:
+        username = entry.data[CONF_USERNAME]
+        alias = entry.data.get(CONF_NAME, username)
         self._username = username
         self._alias = alias
-        self._phone_number = phone_number
+        self._phone_number = entry.runtime_data.phone_number
         self._sms_count = 0
-        self._last_sent = None
-        self._sms_log = []
-        self._state = "Idle"
-        self._attr_extra_state_attributes = {}
+        self._last_sent: str | None = None
+        self._sms_log: list[dict] = []
+        self._attr_unique_id = f"freesmsxa_{entry.entry_id}_status"
+        self._attr_native_value = "Idle"
+        self._attr_device_info = build_device_info(username, alias)
+        self._refresh_attributes()
 
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
-            "name": f"Free Mobile SMS ({self._alias})",
-            "manufacturer": "Free Mobile",
-            "model": "SMS Gateway",
-            "sw_version": "1.0",
-        }
+    async def async_added_to_hass(self) -> None:
+        """Restore counter and log after a restart."""
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if last_state is None:
+            return
 
-    @property
-    def state(self):
-        return self._state
+        attrs = last_state.attributes
+        self._sms_count = int(attrs.get("sms_count") or 0)
+        self._last_sent = attrs.get("last_sent")
+        log = attrs.get("sms_log") or []
+        if isinstance(log, list):
+            self._sms_log = log[:10]
+        if last_state.state not in (None, "unknown", "unavailable"):
+            self._attr_native_value = last_state.state
+        self._refresh_attributes()
 
-    def notify_sent(self, message=""):
+    def notify_sent(self, message: str = "") -> None:
+        """Record a successfully sent SMS."""
         self._sms_count += 1
-        self._last_sent = datetime.now().isoformat()
-        self._sms_log.insert(0, {"message": message or "SMS envoyé", "time": self._last_sent})
-        self._sms_log = self._sms_log[:10]  # garder les 10 derniers
-        self._state = "Last sent"
+        self._last_sent = dt_util.now().isoformat()
+        self._sms_log.insert(
+            0, {"message": message or "SMS envoyé", "time": self._last_sent}
+        )
+        self._sms_log = self._sms_log[:10]
+        self._attr_native_value = "Last sent"
+        self._refresh_attributes()
+        self.async_write_ha_state()
+
+    def _refresh_attributes(self) -> None:
         self._attr_extra_state_attributes = {
             "sms_count": self._sms_count,
             "last_sent": self._last_sent,
@@ -66,4 +84,3 @@ class FreeSMSSensor(SensorEntity):
             "phone_number": self._phone_number or "Non renseigné",
             "sms_log": self._sms_log,
         }
-        self.async_write_ha_state()

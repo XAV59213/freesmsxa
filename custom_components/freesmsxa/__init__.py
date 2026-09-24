@@ -1,19 +1,48 @@
 """Init for Free Mobile SMS XA."""
 
-import logging
-import voluptuous as vol
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
-from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.device_registry import async_get as async_get_device_registry, DeviceEntryType
+from __future__ import annotations
 
-from .const import DOMAIN, CONF_PHONE_NUMBER
+from dataclasses import dataclass, field
+import logging
+
+import voluptuous as vol
+from freesms import FreeClient
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_USERNAME
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.device_registry import async_get as async_get_device_registry
+
+from .const import (
+    ATTR_MESSAGE,
+    ATTR_TARGET,
+    CONF_PHONE_NUMBER,
+    DOMAIN,
+    PLATFORMS,
+    SERVICE_SEND_SMS,
+)
+from .helpers import build_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
-# Define config schema to indicate the integration only supports config entries
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+
+@dataclass
+class FreeSMSRuntimeData:
+    """Runtime data attached to a config entry."""
+
+    client: FreeClient
+    username: str
+    alias: str
+    phone_number: str | None
+    sensor: object | None = field(default=None)
+
+
+type FreeSMSConfigEntry = ConfigEntry[FreeSMSRuntimeData]
+
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the Free Mobile SMS XA integration."""
@@ -21,80 +50,89 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
     async def handle_send_sms(call: ServiceCall) -> None:
         """Handle the send_sms service call."""
-        target = call.data.get("target")
-        message = call.data.get("message")
-        if not target or not message:
-            _LOGGER.error("Missing target or message in send_sms service call")
+        target = str(call.data[ATTR_TARGET]).strip()
+        message = call.data[ATTR_MESSAGE]
+
+        if target.startswith("notify."):
+            service_name = target.split(".", 1)[1]
+            entity_id = target
+        else:
+            service_name = target
+            entity_id = f"notify.{target}"
+
+        if hass.services.has_service("notify", service_name):
+            await hass.services.async_call(
+                "notify", service_name, {"message": message}, blocking=True
+            )
             return
 
-        raw_target = str(target).strip()
-        if raw_target.startswith("notify."):
-            service_name = raw_target.split(".", 1)[1]
-            entity_id = raw_target
-        else:
-            service_name = raw_target
-            entity_id = f"notify.{raw_target}"
+        if hass.states.get(entity_id) is not None and hass.services.has_service(
+            "notify", "send_message"
+        ):
+            await hass.services.async_call(
+                "notify",
+                "send_message",
+                {"entity_id": entity_id, "message": message},
+                blocking=True,
+            )
+            return
 
-        try:
-            # hass.services.services cannot be read from the event loop.
-            # Use has_service() which is async-friendly.
-            if hass.services.has_service("notify", service_name):
-                await hass.services.async_call(
-                    "notify", service_name, {"message": message}, blocking=True
-                )
-            elif hass.states.get(entity_id) is not None and hass.services.has_service(
-                "notify", "send_message"
-            ):
-                await hass.services.async_call(
-                    "notify",
-                    "send_message",
-                    {"entity_id": entity_id, "message": message},
-                    blocking=True,
-                )
-            else:
-                _LOGGER.error("Invalid notify target: %s", target)
-                return
-            _LOGGER.info("SMS sent via %s: %s", raw_target, message)
-        except Exception as exc:
-            _LOGGER.error("Failed to send SMS via %s: %s", target, exc)
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="invalid_target",
+            translation_placeholders={"target": target},
+        )
 
-    # Register the send_sms service
-    hass.services.async_register(DOMAIN, "send_sms", handle_send_sms)
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SEND_SMS,
+        handle_send_sms,
+        schema=vol.Schema(
+            {
+                vol.Required(ATTR_TARGET): cv.string,
+                vol.Required(ATTR_MESSAGE): cv.string,
+            }
+        ),
+    )
     return True
 
-def mask_token(token):
-    return token[:4] + "****"
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {
-        "username": entry.data["username"],
-        "access_token": entry.data["access_token"],
-        "phone_number": entry.data.get(CONF_PHONE_NUMBER),
-    }
-
-    username = entry.data["username"]
-    token = mask_token(entry.data["access_token"])
-    phone = entry.data.get(CONF_PHONE_NUMBER, "inconnu")
+async def async_setup_entry(hass: HomeAssistant, entry: FreeSMSConfigEntry) -> bool:
+    """Set up a config entry."""
+    username = entry.data[CONF_USERNAME]
     alias = entry.data.get(CONF_NAME, username)
+    phone_number = entry.data.get(CONF_PHONE_NUMBER)
+    client = FreeClient(username, entry.data[CONF_ACCESS_TOKEN])
 
-    device_name = f"{alias} – Token: {token} – Tel: {phone}"
-
-    device_registry = async_get_device_registry(hass)
-    device_registry.async_get_or_create(
-        config_entry_id=entry.entry_id,
-        identifiers={(DOMAIN, f"freesmsxa_{username}")},
-        name=device_name,
-        manufacturer="Free Mobile",
-        model="SMS Gateway",
-        sw_version="1.0",
-        entry_type=DeviceEntryType.SERVICE
+    entry.runtime_data = FreeSMSRuntimeData(
+        client=client,
+        username=username,
+        alias=alias,
+        phone_number=phone_number,
     )
 
-    await hass.config_entries.async_forward_entry_setups(entry, ["notify", "sensor", "button"])
+    device_registry = async_get_device_registry(hass)
+    device_info = build_device_info(username, alias)
+    device_registry.async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers=device_info["identifiers"],
+        name=device_info["name"],
+        manufacturer=device_info["manufacturer"],
+        model=device_info["model"],
+        sw_version=device_info["sw_version"],
+        entry_type=device_info["entry_type"],
+    )
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    await hass.config_entries.async_unload_platforms(entry, ["notify", "sensor", "button"])
-    hass.data[DOMAIN].pop(entry.entry_id)
-    return True
+
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload the entry when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: FreeSMSConfigEntry) -> bool:
+    """Unload a config entry."""
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
