@@ -4,6 +4,14 @@ All notable changes to the Free Mobile SMS XA Home Assistant integration will be
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [6.11.0] - 2026-09-24
+
+### Added
+
+- Native Lovelace card **Envoyer un SMS** (`custom:freesmsxa-send-card`).
+- The card is registered automatically and appears in the dashboard card picker.
+- Recipients are discovered from Free Mobile SMS XA notify entities, including **TOUS LE MONDE !**.
+
 ## [6.10.0] - 2026-09-24
 
 ### Fixed
