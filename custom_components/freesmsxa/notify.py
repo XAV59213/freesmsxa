@@ -1,57 +1,48 @@
 """Notify entity for Free Mobile SMS XA."""
 
+from __future__ import annotations
+
 import logging
-from http import HTTPStatus
 
 from homeassistant.components.notify import NotifyEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, CONF_NAME
+from homeassistant.const import CONF_NAME, CONF_USERNAME
 from homeassistant.core import HomeAssistant
-from .const import DOMAIN
-from .sensor import update_sensor_state
-from freesms import FreeClient
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from . import FreeSMSConfigEntry
+from .helpers import async_send_sms_via_client, build_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
-    username = entry.data[CONF_USERNAME]
-    access_token = entry.data[CONF_ACCESS_TOKEN]
-    alias = entry.data.get(CONF_NAME, username)
-    async_add_entities([
-        FreeSMSNotifyEntity(hass, username, access_token, alias)
-    ])
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: FreeSMSConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up the notify entity."""
+    async_add_entities([FreeSMSNotifyEntity(entry)])
+
 
 class FreeSMSNotifyEntity(NotifyEntity):
-    def __init__(self, hass: HomeAssistant, username: str, access_token: str, alias: str):
-        self.hass = hass
+    """Notify entity that sends SMS through Free Mobile."""
+
+    _attr_has_entity_name = False
+
+    def __init__(self, entry: FreeSMSConfigEntry) -> None:
+        self._entry = entry
+        username = entry.data[CONF_USERNAME]
+        alias = entry.data.get(CONF_NAME, username)
         self._username = username
-        self._access_token = access_token
-        self._alias = alias
-        self.free_client = FreeClient(username, access_token)
         self._attr_name = alias
-
-    @property
-    def unique_id(self) -> str:
-        return f"freesmsxa_notify_{self._username}"
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, f"freesmsxa_{self._username}")},
-            "name": f"Free Mobile SMS ({self._alias})",
-            "manufacturer": "Free Mobile",
-            "model": "SMS Gateway",
-            "sw_version": "1.0",
-        }
+        self._attr_unique_id = f"freesmsxa_notify_{username}"
+        self._attr_device_info = build_device_info(username, alias)
 
     async def async_send_message(self, message: str = "", **kwargs) -> None:
+        """Send an SMS and record it on the status sensor."""
         _LOGGER.debug("Sending SMS to %s: %s", self._username, message)
-        try:
-            resp = await self.hass.async_add_executor_job(self.free_client.send_sms, message)
-            if resp.status_code == HTTPStatus.OK:
-                _LOGGER.info("SMS sent for %s", self._username)
-                update_sensor_state(self.hass, self._username, message)
-            else:
-                _LOGGER.warning("Failed to send SMS to %s (%s)", self._username, resp.status_code)
-        except Exception as exc:
-            _LOGGER.error("Error sending SMS to %s: %s", self._username, exc)
+        await async_send_sms_via_client(self.hass, self._entry.runtime_data.client, message)
+        sensor = getattr(self._entry.runtime_data, "sensor", None)
+        if sensor is not None:
+            sensor.notify_sent(message)
+        _LOGGER.info("SMS sent for %s", self._username)
