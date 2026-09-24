@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from http import HTTPStatus
-
 from freesms import FreeClient
 import voluptuous as vol
 
@@ -13,6 +11,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    API_STATUS_OK,
     CONF_DEBUG,
     CONF_PHONE_NUMBER,
     CONF_SEND_TEST_SMS,
@@ -20,17 +19,13 @@ from .const import (
     DEFAULT_TEST_MESSAGE,
     DOMAIN,
 )
-from .helpers import is_valid_fr_phone
+from .helpers import error_key_for_status, is_valid_fr_phone
 
 
 def _map_status_error(status: int) -> str | None:
-    if status == HTTPStatus.OK:
+    if status == API_STATUS_OK:
         return None
-    if status == HTTPStatus.FORBIDDEN:
-        return "invalid_auth"
-    if status == HTTPStatus.PAYMENT_REQUIRED:
-        return "quota_exceeded"
-    return "api_error"
+    return error_key_for_status(status)
 
 
 class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
