@@ -26,11 +26,17 @@ class FreeSMSXASendCard extends HTMLElement {
   }
 
   getCardSize() {
-    return 4;
+    return 6;
   }
 
   getGridOptions() {
-    return { rows: 4, columns: 12, min_rows: 3, min_columns: 6 };
+    return {
+      rows: 6,
+      columns: 12,
+      min_rows: 5,
+      min_columns: 6,
+      max_rows: 8,
+    };
   }
 
   _isFr() {
@@ -88,7 +94,10 @@ class FreeSMSXASendCard extends HTMLElement {
 
   _nameOf(entityId) {
     const state = this._hass.states[entityId];
-    return (state && (state.attributes.friendly_name || state.attributes.name)) || entityId.replace("notify.", "");
+    return (
+      (state && (state.attributes.friendly_name || state.attributes.name)) ||
+      entityId.replace("notify.", "")
+    );
   }
 
   async _send() {
@@ -139,30 +148,67 @@ class FreeSMSXASendCard extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
-        :host { display: block; }
-        ha-card { padding: 0; }
-        .wrap { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        h2 { margin: 0; font-size: 18px; font-weight: 500; }
-        label { font-size: 12px; opacity: 0.75; display: block; margin-bottom: 4px; }
+        :host {
+          display: block;
+          height: 100%;
+        }
+        ha-card {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+        .wrap {
+          flex: 1;
+          min-height: 0;
+          padding: 12px 14px 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          box-sizing: border-box;
+        }
+        h2 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+        }
+        label {
+          font-size: 12px;
+          opacity: 0.75;
+          display: block;
+          margin-bottom: 4px;
+        }
         select, textarea {
           width: 100%;
           box-sizing: border-box;
-          border-radius: 8px;
+          border-radius: 10px;
           border: 1px solid var(--divider-color);
-          background: var(--card-background-color);
+          background: var(--input-fill-color, var(--secondary-background-color));
           color: var(--primary-text-color);
-          padding: 10px 12px;
+          padding: 8px 10px;
           font: inherit;
         }
-        textarea { min-height: 72px; resize: vertical; }
+        textarea {
+          min-height: 44px;
+          max-height: 72px;
+          resize: none;
+          flex: 1;
+        }
+        .actions {
+          display: flex;
+          justify-content: center;
+          padding-top: 2px;
+          flex-shrink: 0;
+        }
         button {
-          align-self: center;
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 8px;
           border: none;
           border-radius: 12px;
-          padding: 12px 22px;
+          padding: 10px 20px;
           font: inherit;
           font-weight: 600;
           cursor: pointer;
@@ -170,8 +216,13 @@ class FreeSMSXASendCard extends HTMLElement {
           color: var(--text-primary-color, #fff);
         }
         button:disabled { opacity: 0.6; cursor: default; }
-        .status { text-align: center; font-size: 13px; min-height: 1.2em; opacity: 0.85; }
-        .send-icon { font-size: 20px; }
+        .status {
+          text-align: center;
+          font-size: 12px;
+          min-height: 1em;
+          opacity: 0.85;
+          flex-shrink: 0;
+        }
       </style>
       <ha-card>
         <div class="wrap">
@@ -180,13 +231,13 @@ class FreeSMSXASendCard extends HTMLElement {
             <label>${labels.dest}</label>
             <select id="dest">${options}</select>
           </div>
-          <div>
+          <div style="display:flex;flex-direction:column;flex:1;min-height:0;">
             <label>${labels.message}</label>
             <textarea id="msg" maxlength="160" placeholder="${labels.placeholder}">${this._message.replace(/</g, "&lt;")}</textarea>
           </div>
-          <button id="send" ${this._sending ? "disabled" : ""}>
-            <span class="send-icon">➤</span> ${labels.send}
-          </button>
+          <div class="actions">
+            <button id="send" ${this._sending ? "disabled" : ""}>${labels.send}</button>
+          </div>
           <div class="status">${this._status}</div>
         </div>
       </ha-card>
@@ -217,7 +268,7 @@ if (!customElements.get(CARD_TAG)) {
 }
 
 window.customCards = window.customCards || [];
- if (!window.customCards.some((card) => card.type === CARD_TAG)) {
+if (!window.customCards.some((card) => card.type === CARD_TAG)) {
   window.customCards.push({
     type: CARD_TAG,
     name: "Envoyer un SMS",
