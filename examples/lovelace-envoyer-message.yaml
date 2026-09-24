@@ -1,0 +1,26 @@
+# Carte dashboard : Envoyer un SMS
+# À coller dans une carte YAML Lovelace.
+# Prérequis : helpers + script dans examples/
+
+type: vertical-stack
+cards:
+  - type: entities
+    title: Envoyer un message
+    entities:
+      - entity: input_select.destinataire_app
+        name: Destinataire
+      - entity: input_text.message_sms
+        name: Message
+    state_color: true
+  - show_name: true
+    show_icon: true
+    type: button
+    name: Envoyer
+    icon: mdi:send
+    tap_action:
+      action: call-service
+      service: script.turn_on
+      target:
+        entity_id: script.envoyer_message_cible_app_mobile
+    show_state: true
+    icon_height: 60px

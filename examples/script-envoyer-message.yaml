@@ -1,0 +1,95 @@
+# Script appelé par la carte Lovelace
+# Automatisations et scènes → Scripts → + Nouveau → Éditeur YAML
+# Adapte les entity_id notify.* à tes lignes Free Mobile SMS XA.
+
+alias: Envoyer message ciblé (App mobile)
+mode: restart
+sequence:
+  - variables:
+      dest: "{{ states('input_select.destinataire_app') }}"
+      msg: "{{ states('input_text.message_sms') }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ msg | trim == '' }}"
+        sequence:
+          - action: persistent_notification.create
+            data:
+              title: Envoi annulé
+              message: Aucun message à envoyer. Merci de saisir un texte.
+          - stop: Message vide
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ dest == 'Maman' }}"
+        sequence:
+          - action: notify.send_message
+            target:
+              entity_id: notify.maman
+            data:
+              message: "{{ msg }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ dest == 'Papa' }}"
+        sequence:
+          - action: notify.send_message
+            target:
+              entity_id: notify.papa
+            data:
+              message: "{{ msg }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ dest == 'Naomie' }}"
+        sequence:
+          - action: notify.send_message
+            target:
+              entity_id: notify.naomie
+            data:
+              message: "{{ msg }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ dest == 'Xavier' }}"
+        sequence:
+          - action: notify.send_message
+            target:
+              entity_id: notify.xavier
+            data:
+              message: "{{ msg }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ dest == 'Anais' }}"
+        sequence:
+          - action: notify.send_message
+            target:
+              entity_id: notify.anais
+            data:
+              message: "{{ msg }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ dest == 'TOUS LE MONDE !' }}"
+        sequence:
+          - action: notify.send_message
+            target:
+              entity_id:
+                - notify.maman
+                - notify.papa
+                - notify.xavier
+                - notify.naomie
+                - notify.anais
+            data:
+              message: "{{ msg }}"
+    default:
+      - action: persistent_notification.create
+        data:
+          title: Envoi annulé
+          message: Destinataire « {{ dest }} » inconnu. Vérifie ton sélecteur.
+      - stop: Destinataire inconnu
+  - action: persistent_notification.create
+    data:
+      title: Message envoyé
+      message: "Envoyé à « {{ dest }} » : {{ msg }}"
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.message_sms
+    data:
+      value: ""

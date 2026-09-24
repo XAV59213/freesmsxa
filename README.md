@@ -19,6 +19,7 @@
 - 📊 Capteur de **statut enrichi** : nombre total de SMS, date du dernier envoi, journal (conservé après redémarrage)
 - 🔘 Bouton test SMS personnalisable (options de l’intégration)
 - 🧹 Historique des 10 derniers messages
+- 📱 Carte dashboard pour écrire et envoyer un SMS
 - 🔁 Reconfiguration de la clé API sans supprimer l’entrée
 - 🧩 Intégration via l’interface graphique Home Assistant
 
@@ -111,7 +112,59 @@ data:
 
 ---
 
-## 📊 Carte Lovelace personnalisée
+## 📱 Carte dashboard — Envoyer un message
+
+Carte utilisée sur le tableau de bord mobile : destinataire + message + bouton Envoyer.
+
+Fichiers prêts à copier :
+- [examples/helpers.yaml](./examples/helpers.yaml)
+- [examples/script-envoyer-message.yaml](./examples/script-envoyer-message.yaml)
+- [examples/lovelace-envoyer-message.yaml](./examples/lovelace-envoyer-message.yaml)
+
+### 1) Créer les deux helpers
+
+**Paramètres → Appareils et services → Entrées → Créer une entrée**
+
+- Liste `input_select.destinataire_app` : `TOUS LE MONDE !`, `Papa`, `Maman`, …
+- Texte `input_text.message_sms` : longueur max 160
+
+### 2) Créer le script
+
+**Automatisations et scènes → Scripts → Nouveau → YAML**  
+Colle [examples/script-envoyer-message.yaml](./examples/script-envoyer-message.yaml) et adapte les `notify.*` à tes lignes.
+
+### 3) Ajouter la carte Lovelace
+
+```yaml
+type: vertical-stack
+cards:
+  - type: entities
+    title: Envoyer un message
+    entities:
+      - entity: input_select.destinataire_app
+        name: Destinataire
+      - entity: input_text.message_sms
+        name: Message
+    state_color: true
+  - show_name: true
+    show_icon: true
+    type: button
+    name: Envoyer
+    icon: mdi:send
+    tap_action:
+      action: call-service
+      service: script.turn_on
+      target:
+        entity_id: script.envoyer_message_cible_app_mobile
+    show_state: true
+    icon_height: 60px
+```
+
+Le bouton appelle `script.envoyer_message_cible_app_mobile`. Si l’ID de ton script est différent, adapte `entity_id`.
+
+---
+
+## 📊 Carte Lovelace — État SMS
 
 ```yaml
 type: vertical-stack

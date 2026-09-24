@@ -1,0 +1,21 @@
+# Helpers à créer dans Paramètres → Appareils et services → Entrées
+# ou à coller dans configuration.yaml
+
+input_select:
+  destinataire_app:
+    name: Destinataire
+    icon: mdi:account-group
+    options:
+      - TOUS LE MONDE !
+      - Papa
+      - Maman
+      - Xavier
+      - Naomie
+      - Anais
+
+input_text:
+  message_sms:
+    name: Message
+    icon: mdi:message-text
+    max: 160
+    mode: text
