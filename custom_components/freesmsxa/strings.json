@@ -28,7 +28,8 @@
       "invalid_auth": "Invalid credentials. Check your user ID and API key.",
       "api_error": "Error while communicating with the Free Mobile API.",
       "connection_error": "Unable to reach the Free Mobile API.",
-      "invalid_phone_number": "Invalid phone number. Use a French format (e.g. +33612345678 or 0612345678)."
+      "invalid_phone_number": "Invalid phone number. Use a French format (e.g. +33612345678 or 0612345678).",
+      "quota_exceeded": "Free Mobile rate limit reached. Wait a few minutes and try again."
     },
     "abort": {
       "already_configured": "This Free Mobile account is already configured.",
@@ -40,39 +41,29 @@
       "init": {
         "title": "Free Mobile SMS XA options",
         "data": {
-          "test_message": "Test SMS message"
+          "test_message": "Test SMS message",
+          "debug": "Enable debug logging"
         }
       }
     }
   },
   "entity": {
     "sensor": {
-      "sms_status": {
-        "name": "SMS status"
-      }
+      "sms_status": { "name": "SMS status" },
+      "sms_count": { "name": "SMS sent" },
+      "sms_today": { "name": "SMS today" }
     },
     "button": {
-      "test_sms": {
-        "name": "Test SMS"
-      }
+      "test_sms": { "name": "Test SMS" }
     }
   },
   "exceptions": {
-    "invalid_target": {
-      "message": "Unknown notify target: {target}"
-    },
-    "invalid_auth": {
-      "message": "Free Mobile rejected the credentials (HTTP 403)."
-    },
-    "invalid_message": {
-      "message": "The SMS was rejected by Free Mobile (invalid or too long message)."
-    },
-    "api_error": {
-      "message": "Free Mobile API error (HTTP {status})."
-    },
-    "connection_error": {
-      "message": "Unable to reach the Free Mobile API."
-    }
+    "invalid_target": { "message": "Unknown notify target: {target}" },
+    "invalid_auth": { "message": "Free Mobile rejected the credentials (HTTP 403)." },
+    "invalid_message": { "message": "The SMS was rejected by Free Mobile (invalid or too long message)." },
+    "quota_exceeded": { "message": "Free Mobile rate limit reached (HTTP 402). Wait before sending again." },
+    "api_error": { "message": "Free Mobile API error (HTTP {status})." },
+    "connection_error": { "message": "Unable to reach the Free Mobile API." }
   },
   "services": {
     "send_sms": {

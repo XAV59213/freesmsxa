@@ -28,7 +28,8 @@
       "invalid_auth": "Identifiants incorrects, vérifiez votre identifiant et votre clé API.",
       "api_error": "Erreur lors de la communication avec l'API Free Mobile.",
       "connection_error": "Impossible de joindre l'API Free Mobile.",
-      "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678)."
+      "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678).",
+      "quota_exceeded": "Limite d'envoi Free Mobile atteinte. Attendez quelques minutes puis réessayez."
     },
     "abort": {
       "already_configured": "Ce compte Free Mobile est déjà configuré.",
@@ -40,39 +41,29 @@
       "init": {
         "title": "Options Free Mobile SMS XA",
         "data": {
-          "test_message": "Message du SMS de test"
+          "test_message": "Message du SMS de test",
+          "debug": "Activer les logs de débogage"
         }
       }
     }
   },
   "entity": {
     "sensor": {
-      "sms_status": {
-        "name": "État SMS"
-      }
+      "sms_status": { "name": "État SMS" },
+      "sms_count": { "name": "SMS envoyés" },
+      "sms_today": { "name": "SMS aujourd'hui" }
     },
     "button": {
-      "test_sms": {
-        "name": "Test SMS"
-      }
+      "test_sms": { "name": "Test SMS" }
     }
   },
   "exceptions": {
-    "invalid_target": {
-      "message": "Cible notify inconnue : {target}"
-    },
-    "invalid_auth": {
-      "message": "Free Mobile a refusé les identifiants (HTTP 403)."
-    },
-    "invalid_message": {
-      "message": "Le SMS a été refusé par Free Mobile (message invalide ou trop long)."
-    },
-    "api_error": {
-      "message": "Erreur de l'API Free Mobile (HTTP {status})."
-    },
-    "connection_error": {
-      "message": "Impossible de joindre l'API Free Mobile."
-    }
+    "invalid_target": { "message": "Cible notify inconnue : {target}" },
+    "invalid_auth": { "message": "Free Mobile a refusé les identifiants (HTTP 403)." },
+    "invalid_message": { "message": "Le SMS a été refusé par Free Mobile (message invalide ou trop long)." },
+    "quota_exceeded": { "message": "Limite d'envoi Free Mobile atteinte (HTTP 402). Attendez avant de renvoyer." },
+    "api_error": { "message": "Erreur de l'API Free Mobile (HTTP {status})." },
+    "connection_error": { "message": "Impossible de joindre l'API Free Mobile." }
   },
   "services": {
     "send_sms": {
