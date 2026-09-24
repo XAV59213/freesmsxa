@@ -26,12 +26,35 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         if not target or not message:
             _LOGGER.error("Missing target or message in send_sms service call")
             return
-        if target not in hass.services.services.get("notify", {}):
-            _LOGGER.error("Invalid notify service: %s", target)
-            return
+
+        raw_target = str(target).strip()
+        if raw_target.startswith("notify."):
+            service_name = raw_target.split(".", 1)[1]
+            entity_id = raw_target
+        else:
+            service_name = raw_target
+            entity_id = f"notify.{raw_target}"
+
         try:
-            await hass.services.async_call("notify", target, {"message": message})
-            _LOGGER.info("SMS sent via %s: %s", target, message)
+            # hass.services.services cannot be read from the event loop.
+            # Use has_service() which is async-friendly.
+            if hass.services.has_service("notify", service_name):
+                await hass.services.async_call(
+                    "notify", service_name, {"message": message}, blocking=True
+                )
+            elif hass.states.get(entity_id) is not None and hass.services.has_service(
+                "notify", "send_message"
+            ):
+                await hass.services.async_call(
+                    "notify",
+                    "send_message",
+                    {"entity_id": entity_id, "message": message},
+                    blocking=True,
+                )
+            else:
+                _LOGGER.error("Invalid notify target: %s", target)
+                return
+            _LOGGER.info("SMS sent via %s: %s", raw_target, message)
         except Exception as exc:
             _LOGGER.error("Failed to send SMS via %s: %s", target, exc)
 
