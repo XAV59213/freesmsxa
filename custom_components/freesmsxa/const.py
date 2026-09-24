@@ -12,7 +12,7 @@ PLATFORMS = ["notify", "sensor", "button"]
 
 MANUFACTURER = "Free Mobile"
 MODEL = "SMS Gateway"
-VERSION = "6.12.0"
+VERSION = "6.12.1"
 
 SERVICE_SEND_SMS = "send_sms"
 ATTR_TARGET = "target"
@@ -28,6 +28,23 @@ JSMODULES = [
 ]
 
 SMS_LOG_MAX = 50
+SMS_MAX_LENGTH = 1000
 EVENT_SMS_SENT = f"{DOMAIN}_sms_sent"
 EVENT_SMS_FAILED = f"{DOMAIN}_sms_failed"
 LOGGER_NAME = f"custom_components.{DOMAIN}"
+
+# Official Free Mobile /sendmsg HTTP codes.
+API_STATUS_OK = 200
+API_STATUS_BAD_REQUEST = 400
+API_STATUS_QUOTA = 402
+API_STATUS_FORBIDDEN = 403
+API_STATUS_SERVER = 500
+API_RETRY_STATUSES = frozenset({API_STATUS_SERVER})
+API_RETRY_DELAY = 2
+
+API_STATUS_ERRORS = {
+    API_STATUS_BAD_REQUEST: "invalid_message",
+    API_STATUS_QUOTA: "quota_exceeded",
+    API_STATUS_FORBIDDEN: "invalid_auth",
+    API_STATUS_SERVER: "server_error",
+}

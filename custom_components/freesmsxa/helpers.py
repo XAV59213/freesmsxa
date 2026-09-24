@@ -2,22 +2,27 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
-from http import HTTPStatus
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 
 from .const import (
+    API_RETRY_DELAY,
+    API_RETRY_STATUSES,
+    API_STATUS_ERRORS,
+    API_STATUS_OK,
     DOMAIN,
     EVENT_SMS_FAILED,
     EVENT_SMS_SENT,
     LOGGER_NAME,
     MANUFACTURER,
     MODEL,
+    SMS_MAX_LENGTH,
     VERSION,
 )
 
@@ -65,33 +70,33 @@ def async_get_entry_by_username(
     return None
 
 
-def _error_key_for_status(status: int | None) -> str:
-    if status == HTTPStatus.FORBIDDEN:
-        return "invalid_auth"
-    if status == HTTPStatus.BAD_REQUEST:
-        return "invalid_message"
-    if status == HTTPStatus.PAYMENT_REQUIRED:
-        return "quota_exceeded"
-    return "api_error"
-
-
-async def async_send_sms_via_client(hass: HomeAssistant, client, message: str) -> None:
-    """Send an SMS and raise a translated HomeAssistantError on failure."""
-    _LOGGER.debug("Calling Free Mobile API, length=%s", len(message or ""))
-    try:
-        response = await hass.async_add_executor_job(client.send_sms, message)
-    except Exception as err:  # noqa: BLE001 - library can raise various errors
-        _LOGGER.exception("Free Mobile API request failed")
-        raise HomeAssistantError(
+def validate_message(message: str) -> str:
+    """Normalize and validate an SMS body before calling the API."""
+    text = (message or "").strip()
+    if not text:
+        raise ServiceValidationError(
             translation_domain=DOMAIN,
-            translation_key="connection_error",
-        ) from err
+            translation_key="empty_message",
+        )
+    if len(text) > SMS_MAX_LENGTH:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="message_too_long",
+            translation_placeholders={"max": str(SMS_MAX_LENGTH)},
+        )
+    return text
 
-    status = getattr(response, "status_code", None)
-    _LOGGER.debug("Free Mobile API status=%s", status)
-    if status == HTTPStatus.OK:
-        return
-    key = _error_key_for_status(status)
+
+def error_key_for_status(status: int | None) -> str:
+    """Map a Free Mobile HTTP status to a translation key."""
+    if status is None:
+        return "connection_error"
+    return API_STATUS_ERRORS.get(int(status), "api_error")
+
+
+def raise_for_api_status(status: int | None) -> None:
+    """Raise a translated HomeAssistantError for a non-success API status."""
+    key = error_key_for_status(status)
     if key == "api_error":
         raise HomeAssistantError(
             translation_domain=DOMAIN,
@@ -99,6 +104,41 @@ async def async_send_sms_via_client(hass: HomeAssistant, client, message: str) -
             translation_placeholders={"status": str(status)},
         )
     raise HomeAssistantError(translation_domain=DOMAIN, translation_key=key)
+
+
+async def async_send_sms_via_client(hass: HomeAssistant, client, message: str) -> int:
+    """Send an SMS. Returns HTTP 200 or raises HomeAssistantError."""
+    text = validate_message(message)
+    _LOGGER.debug("Calling Free Mobile API, length=%s", len(text))
+
+    last_status: int | None = None
+    attempts = 2
+    for attempt in range(1, attempts + 1):
+        try:
+            response = await hass.async_add_executor_job(client.send_sms, text)
+        except Exception as err:  # noqa: BLE001 - library can raise various errors
+            _LOGGER.exception("Free Mobile API request failed")
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="connection_error",
+            ) from err
+
+        last_status = getattr(response, "status_code", None)
+        _LOGGER.debug("Free Mobile API status=%s attempt=%s", last_status, attempt)
+
+        if last_status == API_STATUS_OK:
+            return API_STATUS_OK
+
+        if last_status in API_RETRY_STATUSES and attempt < attempts:
+            _LOGGER.warning(
+                "Free Mobile API HTTP %s, retrying in %ss", last_status, API_RETRY_DELAY
+            )
+            await asyncio.sleep(API_RETRY_DELAY)
+            continue
+        break
+
+    raise_for_api_status(last_status)
+    return last_status or 0
 
 
 async def async_send_and_record(
@@ -120,8 +160,8 @@ async def async_send_and_record(
         )
 
     try:
-        await async_send_sms_via_client(hass, client, message)
-    except HomeAssistantError as err:
+        status = await async_send_sms_via_client(hass, client, message)
+    except (HomeAssistantError, ServiceValidationError) as err:
         error_key = getattr(err, "translation_key", None) or "api_error"
         if sensor is not None:
             sensor.notify_failed(message, error_key)
@@ -140,5 +180,10 @@ async def async_send_and_record(
         sensor.notify_sent(message)
     hass.bus.async_fire(
         EVENT_SMS_SENT,
-        {"alias": alias, "source": source, "message": message},
+        {
+            "alias": alias,
+            "source": source,
+            "message": message,
+            "status": status,
+        },
     )
