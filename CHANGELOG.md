@@ -4,51 +4,61 @@ All notable changes to the Free Mobile SMS XA Home Assistant integration will be
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [6.12.0] - 2026-09-24
+
+### Added
+
+- Quota handling for Free Mobile HTTP 402 (`quota_exceeded`), with sensor state `Quota` and `quota_status: throttled`.
+- SMS history of the last 50 messages (success and failures) on the status sensor `sms_log`.
+- Events `freesmsxa_sms_sent` and `freesmsxa_sms_failed` for automations / logbook.
+- Numeric sensors **SMS sent** and **SMS today** (graphable).
+- Config entry diagnostics (token redacted) from the device page.
+- Options toggle **Enable debug logging**.
+- Lovelace card: 160-character counter, visual title editor, no full re-render on each state update.
+
+### Changed
+
+- Failed sends are recorded in history instead of being silent on the sensor.
+
+## [6.11.2] - 2026-09-24
+
+### Fixed
+
+- Lovelace resource registration on current Home Assistant (`resource_mode` instead of `mode`).
+- Custom card missing in the dashboard editor (`Custom element not found`).
+
+## [6.11.1] - 2026-09-24
+
+### Fixed
+
+- Send button overflowing onto the next dashboard card on mobile.
+
 ## [6.11.0] - 2026-09-24
 
 ### Added
 
 - Native Lovelace card **Envoyer un SMS** (`custom:freesmsxa-send-card`).
-- The card is registered automatically and appears in the dashboard card picker.
-- Recipients are discovered from Free Mobile SMS XA notify entities, including **TOUS LE MONDE !**.
 
 ## [6.10.0] - 2026-09-24
 
 ### Fixed
 
-- RuntimeError `Cannot be called from within the event loop` when calling `freesmsxa.send_sms` (`hass.services.services` is not event-loop safe).
+- RuntimeError `Cannot be called from within the event loop` when calling `freesmsxa.send_sms`.
 - Test SMS button ignored option changes until a full restart.
-- Notify / button / sensor used inconsistent device names.
 - Failed SMS sends were logged but treated as success by Home Assistant.
 - SMS counter and history were lost on restart.
 
 ### Changed
 
-- Device name no longer embeds a token prefix or phone number.
-- Shared `FreeClient` stored on `entry.runtime_data` instead of duplicating credentials on every entity.
-- Status sensor uses `RestoreEntity`, `dt_util` and `_attr_native_value`.
-- `send_sms` validates input with a schema and raises `ServiceValidationError` on an unknown target.
-- Config entries use `async_set_unique_id` to prevent duplicate accounts.
-- `iot_class` set to `cloud_polling`.
+- Shared `FreeClient` stored on `entry.runtime_data`.
+- Status sensor uses `RestoreEntity`.
 
 ### Added
 
-- Options reload listener so the test message is applied immediately.
-- Reconfigure flow to update API key, alias and phone number without deleting the entry.
-- Optional validation SMS checkbox during initial setup.
-- French phone number format check.
-- Translated entity names, exceptions and service descriptions.
+- Reconfigure flow, translated errors, French phone validation.
 
 ## [6.9.2] - 2026-09-24
 
 ### Fixed
 
-- Replaced `hass.services.services` with `hass.services.has_service()` in `send_sms`.
-- Accept both `papa` and `notify.papa` as target.
-- Fall back to `notify.send_message` when only a notify entity exists.
-
-## [6.9.1] - 2025-12-07
-
-### Changed
-
-- Maintenance release of the Free Mobile SMS XA integration.
+- Replaced `hass.services.services` with `hass.services.has_service()`.

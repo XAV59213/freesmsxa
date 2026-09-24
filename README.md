@@ -8,20 +8,21 @@
 
 <a href="https://www.buymeacoffee.com/xav59213"> <img src="https://img.buymeacoffee.com/button-api/?text=xav59213&emoji=&slug=xav59213&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" />
 
-**Free Mobile SMS XA** est une intégration personnalisée pour [Home Assistant](https://www.home-assistant.io/) qui permet d’envoyer des notifications **par SMS** via l’API gratuite de Free Mobile. Elle prend en charge plusieurs lignes, crée des entités (capteurs, boutons, `notify`) et offre une interface complète dans Lovelace.
+**Free Mobile SMS XA** est une intégration personnalisée pour [Home Assistant](https://www.home-assistant.io/) qui permet d’envoyer des notifications **par SMS** via l’API gratuite de Free Mobile. Elle prend en charge plusieurs lignes, crée des entités (capteurs, boutons, `notify`) et offre une carte Lovelace native.
 
 ---
 
 ## 🔧 Fonctionnalités
 
-- 🔔 Envoi de SMS via l’entité `notify.<nom>`
+- 🔔 Envoi de SMS via `notify.<nom>` / `notify.send_message`
 - 👥 Support **multi-utilisateurs** (ex : `Papa`, `Maman`)
-- 📊 Capteur de **statut enrichi** : nombre total de SMS, date du dernier envoi, journal (conservé après redémarrage)
-- 🔘 Bouton test SMS personnalisable (options de l’intégration)
-- 🧹 Historique des 10 derniers messages
-- 📱 Carte dashboard pour écrire et envoyer un SMS
+- 📊 Capteur d’état : total, aujourd’hui, quota, dernière erreur
+- 📜 Historique des **50** derniers SMS (succès et échecs), conservé après redémarrage
+- 🚦 Gestion du quota Free Mobile (HTTP 402)
+- 🔍 Diagnostics téléchargeables (clé API masquée) + option logs debug
+- 🔘 Bouton test SMS personnalisable
+- 📱 Carte Lovelace native **Envoyer un SMS** (`custom:freesmsxa-send-card`)
 - 🔁 Reconfiguration de la clé API sans supprimer l’entrée
-- 🧩 Intégration via l’interface graphique Home Assistant
 
 ---
 
@@ -112,96 +113,58 @@ data:
 
 ---
 
-## 📱 Carte dashboard — Envoyer un message
+## 📱 Carte Lovelace native — Envoyer un SMS
 
-Carte utilisée sur le tableau de bord mobile : destinataire + message + bouton Envoyer.
-
-Fichiers prêts à copier :
-- [examples/helpers.yaml](./examples/helpers.yaml)
-- [examples/script-envoyer-message.yaml](./examples/script-envoyer-message.yaml)
-- [examples/lovelace-envoyer-message.yaml](./examples/lovelace-envoyer-message.yaml)
-
-### 1) Créer les deux helpers
-
-**Paramètres → Appareils et services → Entrées → Créer une entrée**
-
-- Liste `input_select.destinataire_app` : `TOUS LE MONDE !`, `Papa`, `Maman`, …
-- Texte `input_text.message_sms` : longueur max 160
-
-### 2) Créer le script
-
-**Automatisations et scènes → Scripts → Nouveau → YAML**  
-Colle [examples/script-envoyer-message.yaml](./examples/script-envoyer-message.yaml) et adapte les `notify.*` à tes lignes.
-
-### 3) Ajouter la carte Lovelace
+Après mise à jour, **Modifier le tableau de bord → Ajouter une carte → Envoyer un SMS**.
 
 ```yaml
-type: vertical-stack
-cards:
-  - type: entities
-    title: Envoyer un message
-    entities:
-      - entity: input_select.destinataire_app
-        name: Destinataire
-      - entity: input_text.message_sms
-        name: Message
-    state_color: true
-  - show_name: true
-    show_icon: true
-    type: button
-    name: Envoyer
-    icon: mdi:send
-    tap_action:
-      action: call-service
-      service: script.turn_on
-      target:
-        entity_id: script.envoyer_message_cible_app_mobile
-    show_state: true
-    icon_height: 60px
+type: custom:freesmsxa-send-card
 ```
 
-Le bouton appelle `script.envoyer_message_cible_app_mobile`. Si l’ID de ton script est différent, adapte `entity_id`.
+Si la carte n’apparaît pas : **Paramètres → Tableaux de bord → ⋮ → Ressources** et ajoute `/freesmsxa/freesmsxa-send-card.js` en module JavaScript, puis redémarre l’app.
+
+Compteur 160 caractères intégré. Destinataires détectés automatiquement, option **TOUS LE MONDE !**.
 
 ---
 
-## 📊 Carte Lovelace — État SMS
+## 📊 Historique, quota et debug
+
+Le capteur **État SMS** expose :
+
+- `sms_count` / `sms_today` / `quota_status` (`ok` ou `throttled`)
+- `last_error` (`quota_exceeded`, `invalid_auth`, …)
+- `sms_log` : 50 derniers envois (`status: sent|failed`)
+
+Deux capteurs numériques permettent de grapher **SMS envoyés** et **SMS aujourd’hui**.
+
+Événements : `freesmsxa_sms_sent` et `freesmsxa_sms_failed`.
+
+**Diagnostics** : appareil Free Mobile SMS → ⋮ → Télécharger les diagnostics (la clé API est masquée).
+
+**Logs debug** : options de l’intégration → *Activer les logs de débogage*.
 
 ```yaml
-type: vertical-stack
-cards:
-  - type: entity
-    entity: sensor.free_mobile_sms_papa_etat_sms
-    name: 📲 Papa - État SMS
-  - type: button
-    name: ✉️ Envoyer un test
-    entity: button.free_mobile_sms_papa_test_sms
-    tap_action:
-      action: perform-action
-      perform_action: button.press
-      target:
-        entity_id: button.free_mobile_sms_papa_test_sms
-  - type: markdown
-    title: 📝 Historique des SMS
-    content: >
-      {% set log = state_attr('sensor.free_mobile_sms_papa_etat_sms', 'sms_log') %}
-      {% if log %}
-      {% for item in log %}
-      • **{{ item.time }}** : {{ item.message }}
-      {% endfor %}
-      {% else %}
-      Aucun SMS envoyé.
-      {% endif %}
+type: markdown
+title: Historique des SMS
+content: >
+  {% set log = state_attr('sensor.free_mobile_sms_papa_etat_sms', 'sms_log') %}
+  {% if log %}
+  {% for item in log %}
+  • **{{ item.time }}** [{{ item.status }}] {{ item.message }}
+  {% endfor %}
+  {% else %}
+  Aucun SMS.
+  {% endif %}
 ```
 
-Les IDs d’entités dépendent du nom que tu as donné à la ligne. Vérifie-les dans **Paramètres > Entités**.
+Les IDs d’entités dépendent du nom de la ligne. Vérifie-les dans **Paramètres > Entités**.
 
 ---
 
 ## 🛡️ Sécurité
 
 - ✅ Aucune donnée externe utilisée
-- ✅ Aucune collecte de messages
-- ✅ La clé API n’est plus affichée dans le nom de l’appareil
+- ✅ La clé API n’est plus affichée dans le nom de l’appareil ni dans les diagnostics
 - ✅ 100 % local côté Home Assistant, envoi uniquement vers l’API Free Mobile
 
 ---
