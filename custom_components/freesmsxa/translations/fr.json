@@ -3,11 +3,21 @@
     "step": {
       "user": {
         "title": "Configurer Free Mobile SMS XA",
-        "description": "Entrez les identifiants de votre compte Free Mobile. Un SMS de test sera envoyé pour les valider.",
+        "description": "Entrez les identifiants de votre compte Free Mobile. Un SMS de validation peut être envoyé pour les vérifier.",
         "data": {
           "username": "Identifiant Free Mobile",
           "access_token": "Clé API",
           "name": "Nom de l'appareil (optionnel)",
+          "phone_number": "Numéro de téléphone (optionnel)",
+          "send_test_sms": "Envoyer un SMS de validation"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigurer Free Mobile SMS XA",
+        "description": "Mettez à jour la clé API, le nom ou le numéro. Un SMS de validation sera envoyé.",
+        "data": {
+          "access_token": "Clé API",
+          "name": "Nom de l'appareil",
           "phone_number": "Numéro de téléphone (optionnel)"
         }
       }
@@ -15,14 +25,14 @@
     "error": {
       "account_already_configured": "Cet identifiant est déjà configuré.",
       "username_already_configured": "Cet identifiant est déjà configuré.",
-      "service_name_already_configured": "Ce nom d’appareil est déjà utilisé.",
-      "invalid_service_name": "Le nom de l’appareil est invalide.",
       "invalid_auth": "Identifiants incorrects, vérifiez votre identifiant et votre clé API.",
-      "invalid_credentials": "Identifiants incorrects, vérifiez votre identifiant et votre clé API.",
-      "invalid_config": "Erreur de configuration, vérifiez vos identifiants.",
       "api_error": "Erreur lors de la communication avec l'API Free Mobile.",
       "connection_error": "Impossible de joindre l'API Free Mobile.",
       "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678)."
+    },
+    "abort": {
+      "already_configured": "Ce compte Free Mobile est déjà configuré.",
+      "reconfigure_successful": "Reconfiguration réussie."
     }
   },
   "options": {
@@ -35,14 +45,43 @@
       }
     }
   },
+  "entity": {
+    "sensor": {
+      "sms_status": {
+        "name": "État SMS"
+      }
+    },
+    "button": {
+      "test_sms": {
+        "name": "Test SMS"
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_target": {
+      "message": "Cible notify inconnue : {target}"
+    },
+    "invalid_auth": {
+      "message": "Free Mobile a refusé les identifiants (HTTP 403)."
+    },
+    "invalid_message": {
+      "message": "Le SMS a été refusé par Free Mobile (message invalide ou trop long)."
+    },
+    "api_error": {
+      "message": "Erreur de l'API Free Mobile (HTTP {status})."
+    },
+    "connection_error": {
+      "message": "Impossible de joindre l'API Free Mobile."
+    }
+  },
   "services": {
     "send_sms": {
       "name": "Envoyer un SMS",
-      "description": "Envoie un SMS via un service notify configuré.",
+      "description": "Envoie un SMS via une entité ou un service notify configuré.",
       "fields": {
         "target": {
-          "name": "Service cible",
-          "description": "Nom du service notify (ex : notify.mon_telephone)."
+          "name": "Cible",
+          "description": "Entité ou service notify (ex. notify.papa ou papa)."
         },
         "message": {
           "name": "Message",

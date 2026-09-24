@@ -1,18 +1,19 @@
 send_sms:
-  name: service_name
-  description: service_description
+  name: Send SMS
+  description: Send an SMS via a configured notify entity or legacy notify service.
   fields:
     target:
-      name: target_name
-      description: target_description
+      name: Target
+      description: Notify entity or service (papa or notify.papa).
       required: true
-      example: notify.mon_telephone
+      example: notify.papa
       selector:
         text:
     message:
-      name: message_name
-      description: message_description
+      name: Message
+      description: Text message to send.
       required: true
       example: Piscine hors gel !
       selector:
         text:
+          multiline: true

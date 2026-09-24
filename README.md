@@ -6,20 +6,20 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?logo=home-assistant)](https://hacs.xyz/)
 [![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](./LICENSE)
 
-<a href="https://www.buymeacoffee.com/xav59213"> <img src="https://img.buymeacoffee.com/button-api/?text=xav59213&emoji=&slug=xav59213&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /> 
+<a href="https://www.buymeacoffee.com/xav59213"> <img src="https://img.buymeacoffee.com/button-api/?text=xav59213&emoji=&slug=xav59213&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" />
 
-**Free Mobile SMS XA** est une intégration personnalisée pour [Home Assistant](https://www.home-assistant.io/) qui permet d’envoyer des notifications **par SMS** via l’API gratuite de Free Mobile. Elle prend en charge plusieurs lignes, crée des entités (capteurs, boutons, services `notify`) et offre une interface complète dans Lovelace.
+**Free Mobile SMS XA** est une intégration personnalisée pour [Home Assistant](https://www.home-assistant.io/) qui permet d’envoyer des notifications **par SMS** via l’API gratuite de Free Mobile. Elle prend en charge plusieurs lignes, crée des entités (capteurs, boutons, `notify`) et offre une interface complète dans Lovelace.
 
 ---
 
 ## 🔧 Fonctionnalités
 
-- 🔔 Envoi de SMS via `notify.nom_du_service`
+- 🔔 Envoi de SMS via l’entité `notify.<nom>`
 - 👥 Support **multi-utilisateurs** (ex : `Papa`, `Maman`)
-- 📊 Capteur de **statut enrichi** : nombre total de SMS, date du dernier envoi, journal
-- 🔘 Bouton test SMS personnalisable
-- 🧾 Historique des 10 derniers messages
-- 🎨 Carte Lovelace complète prête à l’emploi
+- 📊 Capteur de **statut enrichi** : nombre total de SMS, date du dernier envoi, journal (conservé après redémarrage)
+- 🔘 Bouton test SMS personnalisable (options de l’intégration)
+- 🧹 Historique des 10 derniers messages
+- 🔁 Reconfiguration de la clé API sans supprimer l’entrée
 - 🧩 Intégration via l’interface graphique Home Assistant
 
 ---
@@ -43,10 +43,10 @@
 ## ⚙️ Setup
 
 Shortcut:  
-[![](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=freesmsxa)  
+[![](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=freesmsxa)
 
-- Allez dans **Paramètres -> Intégrations -> Ajouter une intégration**  
-- Cherchez **"Free SMS"** et suivez les instructions dans le **config flow**.  
+- Allez dans **Paramètres -> Intégrations -> Ajouter une intégration**
+- Cherchez **Free Mobile SMS XA** et suivez les instructions.
 
 ---
 
@@ -56,7 +56,7 @@ Shortcut:
 
 1. Ouvre **HACS > Intégrations**
 2. Clique sur **les trois points > Dépôts personnalisés**
-3. Ajoute :  
+3. Ajoute :
    ```
    https://github.com/XAV59213/freesmsxa
    ```
@@ -77,36 +77,37 @@ Shortcut:
 
 ---
 
-## ⚙️ Exemple d’automatisation
+## ⚙️ Exemple d’automatisation (recommandé)
+
+Depuis Home Assistant 2024.6, le bon appel est `notify.send_message` sur l’entité créée par l’intégration :
 
 ```yaml
-description: ""
+alias: Alarme activée
 mode: single
 triggers:
-  - device_id: f9c723991602ba75c1b74953ce38b854
-    domain: alarm_control_panel
-    entity_id: 257d080f03fb6013a27d97ef9d37efec
-    type: armed_away
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 10
-    trigger: device
-conditions: []
+  - trigger: state
+    entity_id: alarm_control_panel.maison
+    to: armed_away
 actions:
   - action: notify.send_message
-    metadata: {}
-    data:
-      message: Alarme activer !
     target:
       entity_id:
         - notify.maman
         - notify.papa
-        - notify.xavier
-        - notify.naomie
-        - notify.anais
-
+    data:
+      message: Alarme activée
 ```
+
+### Alternative : service de l’intégration
+
+```yaml
+action: freesmsxa.send_sms
+data:
+  target: notify.papa
+  message: Alarme activée
+```
+
+`target` accepte `papa` ou `notify.papa`.
 
 ---
 
@@ -116,20 +117,20 @@ actions:
 type: vertical-stack
 cards:
   - type: entity
-    entity: sensor.free_mobile_sms_papa_sms_status
+    entity: sensor.free_mobile_sms_papa_etat_sms
     name: 📲 Papa - État SMS
   - type: button
     name: ✉️ Envoyer un test
-    entity: button.test_sms_12345678
+    entity: button.free_mobile_sms_papa_test_sms
     tap_action:
-      action: call-service
-      service: button.press
+      action: perform-action
+      perform_action: button.press
       target:
-        entity_id: button.test_sms_12345678
+        entity_id: button.free_mobile_sms_papa_test_sms
   - type: markdown
     title: 📝 Historique des SMS
     content: >
-      {% set log = state_attr('sensor.free_mobile_sms_papa_sms_status', 'sms_log') %}
+      {% set log = state_attr('sensor.free_mobile_sms_papa_etat_sms', 'sms_log') %}
       {% if log %}
       {% for item in log %}
       • **{{ item.time }}** : {{ item.message }}
@@ -139,18 +140,20 @@ cards:
       {% endif %}
 ```
 
+Les IDs d’entités dépendent du nom que tu as donné à la ligne. Vérifie-les dans **Paramètres > Entités**.
+
 ---
 
 ## 🛡️ Sécurité
 
 - ✅ Aucune donnée externe utilisée
 - ✅ Aucune collecte de messages
-- ✅ La Clé API est invisible après validation
-- ✅ 100 % local, 100 % Free Mobile
+- ✅ La clé API n’est plus affichée dans le nom de l’appareil
+- ✅ 100 % local côté Home Assistant, envoi uniquement vers l’API Free Mobile
 
 ---
 
-## 🧾 Licence
+## 🧰 Licence
 
 Distribué sous **GNU LGPL v2.1** – [Voir la licence](./LICENSE)
 
