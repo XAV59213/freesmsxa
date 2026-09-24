@@ -3,10 +3,11 @@
   "name": "Free Mobile SMS XA",
   "codeowners": ["@XAV59213"],
   "config_flow": true,
+  "dependencies": ["frontend", "http"],
   "documentation": "https://github.com/XAV59213/freesmsxa",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/XAV59213/freesmsxa/issues",
   "requirements": ["freesms>=0.2.1"],
-  "version": "6.10.0"
+  "version": "6.11.0"
 }

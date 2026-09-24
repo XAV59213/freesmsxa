@@ -23,6 +23,7 @@ from .const import (
     PLATFORMS,
     SERVICE_SEND_SMS,
 )
+from .frontend import JSModuleRegistration
 from .helpers import build_device_info
 
 _LOGGER = logging.getLogger(__name__)
@@ -94,6 +95,7 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             }
         ),
     )
+    await JSModuleRegistration(hass).async_register()
     return True
 
 

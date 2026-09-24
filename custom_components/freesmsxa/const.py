@@ -11,8 +11,17 @@ PLATFORMS = ["notify", "sensor", "button"]
 
 MANUFACTURER = "Free Mobile"
 MODEL = "SMS Gateway"
-VERSION = "6.10.0"
+VERSION = "6.11.0"
 
 SERVICE_SEND_SMS = "send_sms"
 ATTR_TARGET = "target"
 ATTR_MESSAGE = "message"
+
+URL_BASE = "/freesmsxa"
+JSMODULES = [
+    {
+        "name": "Envoyer un SMS",
+        "filename": "freesmsxa-send-card.js",
+        "version": VERSION,
+    }
+]
