@@ -25,11 +25,13 @@
     "error": {
       "account_already_configured": "Cet identifiant est déjà configuré.",
       "username_already_configured": "Cet identifiant est déjà configuré.",
-      "invalid_auth": "Identifiants incorrects, vérifiez votre identifiant et votre clé API.",
+      "invalid_auth": "Identifiants incorrects ou notifications SMS désactivées.",
       "api_error": "Erreur lors de la communication avec l'API Free Mobile.",
       "connection_error": "Impossible de joindre l'API Free Mobile.",
       "invalid_phone_number": "Numéro de téléphone invalide. Utilisez un format français (ex : +33612345678 ou 0612345678).",
-      "quota_exceeded": "Limite d'envoi Free Mobile atteinte. Attendez quelques minutes puis réessayez."
+      "quota_exceeded": "Limite d'envoi Free Mobile atteinte. Attendez quelques minutes puis réessayez.",
+      "server_error": "Erreur serveur Free Mobile (HTTP 500). Réessayez dans un instant.",
+      "invalid_message": "Le SMS a été refusé (paramètre manquant ou invalide)."
     },
     "abort": {
       "already_configured": "Ce compte Free Mobile est déjà configuré.",
@@ -59,9 +61,12 @@
   },
   "exceptions": {
     "invalid_target": { "message": "Cible notify inconnue : {target}" },
-    "invalid_auth": { "message": "Free Mobile a refusé les identifiants (HTTP 403)." },
-    "invalid_message": { "message": "Le SMS a été refusé par Free Mobile (message invalide ou trop long)." },
+    "invalid_auth": { "message": "Free Mobile a refusé les identifiants ou les notifications SMS sont désactivées (HTTP 403)." },
+    "invalid_message": { "message": "Le SMS a été refusé par Free Mobile (paramètre manquant ou invalide, HTTP 400)." },
+    "empty_message": { "message": "Impossible d'envoyer un SMS vide." },
+    "message_too_long": { "message": "Le message est trop long (maximum {max} caractères)." },
     "quota_exceeded": { "message": "Limite d'envoi Free Mobile atteinte (HTTP 402). Attendez avant de renvoyer." },
+    "server_error": { "message": "Erreur serveur Free Mobile (HTTP 500). Réessayez plus tard." },
     "api_error": { "message": "Erreur de l'API Free Mobile (HTTP {status})." },
     "connection_error": { "message": "Impossible de joindre l'API Free Mobile." }
   },

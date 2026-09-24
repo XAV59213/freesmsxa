@@ -29,7 +29,9 @@
       "api_error": "Error while communicating with the Free Mobile API.",
       "connection_error": "Unable to reach the Free Mobile API.",
       "invalid_phone_number": "Invalid phone number. Use a French format (e.g. +33612345678 or 0612345678).",
-      "quota_exceeded": "Free Mobile rate limit reached. Wait a few minutes and try again."
+      "quota_exceeded": "Free Mobile rate limit reached. Wait a few minutes and try again.",
+      "server_error": "Free Mobile server error (HTTP 500). Try again in a moment.",
+      "invalid_message": "The SMS was rejected (missing or invalid parameter)."
     },
     "abort": {
       "already_configured": "This Free Mobile account is already configured.",
@@ -59,9 +61,12 @@
   },
   "exceptions": {
     "invalid_target": { "message": "Unknown notify target: {target}" },
-    "invalid_auth": { "message": "Free Mobile rejected the credentials (HTTP 403)." },
-    "invalid_message": { "message": "The SMS was rejected by Free Mobile (invalid or too long message)." },
+    "invalid_auth": { "message": "Free Mobile rejected the credentials or SMS notifications are disabled (HTTP 403)." },
+    "invalid_message": { "message": "The SMS was rejected by Free Mobile (missing or invalid parameter, HTTP 400)." },
+    "empty_message": { "message": "Cannot send an empty SMS." },
+    "message_too_long": { "message": "The message is too long (max {max} characters)." },
     "quota_exceeded": { "message": "Free Mobile rate limit reached (HTTP 402). Wait before sending again." },
+    "server_error": { "message": "Free Mobile server error (HTTP 500). Try again later." },
     "api_error": { "message": "Free Mobile API error (HTTP {status})." },
     "connection_error": { "message": "Unable to reach the Free Mobile API." }
   },
