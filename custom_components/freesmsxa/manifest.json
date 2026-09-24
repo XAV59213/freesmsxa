@@ -1,8 +1,8 @@
 {
   "domain": "freesmsxa",
   "name": "Free Mobile SMS XA",
-  "codeowners": ["@XAV59213"],
   "after_dependencies": ["lovelace"],
+  "codeowners": ["@XAV59213"],
   "config_flow": true,
   "dependencies": ["frontend", "http"],
   "documentation": "https://github.com/XAV59213/freesmsxa",
