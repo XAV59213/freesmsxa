@@ -13,6 +13,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    CONF_DEBUG,
     CONF_PHONE_NUMBER,
     CONF_SEND_TEST_SMS,
     CONF_TEST_MESSAGE,
@@ -20,6 +21,16 @@ from .const import (
     DOMAIN,
 )
 from .helpers import is_valid_fr_phone
+
+
+def _map_status_error(status: int) -> str | None:
+    if status == HTTPStatus.OK:
+        return None
+    if status == HTTPStatus.FORBIDDEN:
+        return "invalid_auth"
+    if status == HTTPStatus.PAYMENT_REQUIRED:
+        return "quota_exceeded"
+    return "api_error"
 
 
 class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -49,10 +60,9 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         response = await self.hass.async_add_executor_job(
                             client.send_sms, "Configuration du compte OK"
                         )
-                        if response.status_code == HTTPStatus.FORBIDDEN:
-                            errors["base"] = "invalid_auth"
-                        elif response.status_code != HTTPStatus.OK:
-                            errors["base"] = "api_error"
+                        mapped = _map_status_error(response.status_code)
+                        if mapped:
+                            errors["base"] = mapped
                 except Exception:  # noqa: BLE001
                     errors["base"] = "connection_error"
 
@@ -65,7 +75,10 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_NAME: alias,
                         CONF_PHONE_NUMBER: phone or None,
                     },
-                    options={CONF_TEST_MESSAGE: DEFAULT_TEST_MESSAGE},
+                    options={
+                        CONF_TEST_MESSAGE: DEFAULT_TEST_MESSAGE,
+                        CONF_DEBUG: False,
+                    },
                 )
 
         return self.async_show_form(
@@ -102,10 +115,9 @@ class FreeSMSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     response = await self.hass.async_add_executor_job(
                         client.send_sms, "Reconfiguration du compte OK"
                     )
-                    if response.status_code == HTTPStatus.FORBIDDEN:
-                        errors["base"] = "invalid_auth"
-                    elif response.status_code != HTTPStatus.OK:
-                        errors["base"] = "api_error"
+                    mapped = _map_status_error(response.status_code)
+                    if mapped:
+                        errors["base"] = mapped
                 except Exception:  # noqa: BLE001
                     errors["base"] = "connection_error"
 
@@ -164,6 +176,10 @@ class FreeSMSOptionsFlowHandler(config_entries.OptionsFlow):
                     ): selector.TextSelector(
                         selector.TextSelectorConfig(multiline=True)
                     ),
+                    vol.Optional(
+                        CONF_DEBUG,
+                        default=self.config_entry.options.get(CONF_DEBUG, False),
+                    ): bool,
                 }
             ),
         )

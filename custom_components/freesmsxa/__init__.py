@@ -18,13 +18,14 @@ from homeassistant.helpers.device_registry import async_get as async_get_device_
 from .const import (
     ATTR_MESSAGE,
     ATTR_TARGET,
+    CONF_DEBUG,
     CONF_PHONE_NUMBER,
     DOMAIN,
     PLATFORMS,
     SERVICE_SEND_SMS,
 )
 from .frontend import JSModuleRegistration
-from .helpers import build_device_info
+from .helpers import apply_debug_logging, build_device_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -105,6 +106,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: FreeSMSConfigEntry) -> b
     alias = entry.data.get(CONF_NAME, username)
     phone_number = entry.data.get(CONF_PHONE_NUMBER)
     client = FreeClient(username, entry.data[CONF_ACCESS_TOKEN])
+
+    apply_debug_logging(bool(entry.options.get(CONF_DEBUG, False)))
 
     entry.runtime_data = FreeSMSRuntimeData(
         client=client,
