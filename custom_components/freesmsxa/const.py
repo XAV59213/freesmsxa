@@ -12,17 +12,19 @@ PLATFORMS = ["notify", "sensor", "button"]
 
 MANUFACTURER = "Free Mobile"
 MODEL = "SMS Gateway"
-VERSION = "6.12.1"
+VERSION = "6.12.2"
 
 SERVICE_SEND_SMS = "send_sms"
 ATTR_TARGET = "target"
 ATTR_MESSAGE = "message"
 
 URL_BASE = "/freesmsxa"
+LOCAL_CARD_PATH = "/local/freesmsxa-send-card.js"
+CARD_FILENAME = "freesmsxa-send-card.js"
 JSMODULES = [
     {
         "name": "Envoyer un SMS",
-        "filename": "freesmsxa-send-card.js",
+        "filename": CARD_FILENAME,
         "version": VERSION,
     }
 ]
@@ -33,7 +35,6 @@ EVENT_SMS_SENT = f"{DOMAIN}_sms_sent"
 EVENT_SMS_FAILED = f"{DOMAIN}_sms_failed"
 LOGGER_NAME = f"custom_components.{DOMAIN}"
 
-# Official Free Mobile /sendmsg HTTP codes.
 API_STATUS_OK = 200
 API_STATUS_BAD_REQUEST = 400
 API_STATUS_QUOTA = 402
