@@ -6,13 +6,21 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from aiohttp import web
+
 from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http import StaticPathConfig
+from homeassistant.components.http import HomeAssistantView, StaticPathConfig
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.event import async_call_later
 
-from ..const import CARD_FILENAME, JSMODULES, LOCAL_CARD_PATH, URL_BASE, VERSION
+from ..const import (
+    CARD_FILENAME,
+    LOCAL_CARD_PATH,
+    STATIC_CARD_PATH,
+    URL_BASE,
+    VERSION,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,13 +44,36 @@ def _path_only(url: str) -> str:
     return str(url).split("?", 1)[0]
 
 
-def _copy_card_to_www(hass: HomeAssistant) -> Path:
-    """Copy the card JS into /config/www so Lovelace can load /local/."""
-    src = Path(__file__).parent / CARD_FILENAME
-    dest = Path(hass.config.path("www")) / CARD_FILENAME
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_bytes(src.read_bytes())
-    return dest
+def _copy_card_to_www(hass: HomeAssistant) -> Path | None:
+    """Copy the card JS into /config/www so /local/ works as a fallback."""
+    try:
+        src = Path(__file__).parent / CARD_FILENAME
+        dest = Path(hass.config.path("www")) / CARD_FILENAME
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(src.read_bytes())
+        return dest
+    except OSError:
+        _LOGGER.warning("Could not copy Lovelace card to www")
+        return None
+
+
+class FreeSMSXACardView(HomeAssistantView):
+    """Always serve the card JS from the integration package."""
+
+    url = STATIC_CARD_PATH
+    name = "api:freesmsxa:card"
+    requires_auth = False
+
+    async def get(self, request):
+        path = Path(__file__).parent / CARD_FILENAME
+        body = await request.app["hass"].async_add_executor_job(
+            path.read_text, "utf-8"
+        )
+        return web.Response(
+            text=body,
+            content_type="text/javascript",
+            headers={"Cache-Control": "no-cache"},
+        )
 
 
 class JSModuleRegistration:
@@ -56,12 +87,15 @@ class JSModuleRegistration:
     async def async_register(self) -> None:
         """Expose JS files and register them as Lovelace resources."""
         await self._async_register_path()
+        try:
+            self.hass.http.register_view(FreeSMSXACardView())
+        except Exception:  # noqa: BLE001
+            _LOGGER.debug("Card HTTP view already registered")
+
         await self.hass.async_add_executor_job(_copy_card_to_www, self.hass)
 
-        versioned_static = f"{URL_BASE}/{CARD_FILENAME}?v={VERSION}"
-        versioned_local = f"{LOCAL_CARD_PATH}?v={VERSION}"
-        add_extra_js_url(self.hass, versioned_static)
-        add_extra_js_url(self.hass, versioned_local)
+        add_extra_js_url(self.hass, f"{STATIC_CARD_PATH}?v={VERSION}")
+        add_extra_js_url(self.hass, f"{LOCAL_CARD_PATH}?v={VERSION}")
 
         if self.hass.is_running:
             await self._async_register_lovelace_resources()
@@ -72,7 +106,9 @@ class JSModuleRegistration:
             def _schedule_started(_event: Event) -> None:
                 self.hass.async_create_task(self._async_register_lovelace_resources())
 
-            self.hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _schedule_started)
+            self.hass.bus.async_listen_once(
+                EVENT_HOMEASSISTANT_STARTED, _schedule_started
+            )
 
     async def _async_register_path(self) -> None:
         try:
@@ -116,46 +152,42 @@ class JSModuleRegistration:
                 "Add %s as a JavaScript module in Settings > Dashboards > Resources",
                 _MAX_RESOURCE_RETRIES,
                 reason,
-                f"{LOCAL_CARD_PATH}?v={VERSION}",
+                f"{STATIC_CARD_PATH}?v={VERSION}",
             )
             return
         self._retries += 1
-        _LOGGER.debug("Retry %s/%s registering card: %s", self._retries, _MAX_RESOURCE_RETRIES, reason)
+        _LOGGER.debug(
+            "Retry %s/%s registering card: %s",
+            self._retries,
+            _MAX_RESOURCE_RETRIES,
+            reason,
+        )
         async_call_later(self.hass, _RETRY_SECONDS, self._retry_resources)
 
     async def _retry_resources(self, _now: Any) -> None:
         await self._async_register_lovelace_resources()
 
     async def _async_sync_modules(self, resources: Any, items: list[dict]) -> None:
-        """Ensure one up-to-date module resource exists."""
-        wanted_paths = {LOCAL_CARD_PATH, f"{URL_BASE}/{CARD_FILENAME}"}
-        versioned_local = f"{LOCAL_CARD_PATH}?v={VERSION}"
-
+        """Keep existing resources, just bump the cache-bust version."""
+        wanted = {STATIC_CARD_PATH, LOCAL_CARD_PATH}
+        versioned_static = f"{STATIC_CARD_PATH}?v={VERSION}"
         matching = [
-            item
-            for item in items
-            if _path_only(item.get("url", "")) in wanted_paths
+            item for item in items if _path_only(item.get("url", "")) in wanted
         ]
 
         if matching:
-            primary = matching[0]
-            current = _path_only(primary.get("url", ""))
-            current_ver = "0"
-            if "v=" in str(primary.get("url", "")):
-                current_ver = str(primary["url"]).split("v=", 1)[1]
-            if current != LOCAL_CARD_PATH or current_ver != VERSION:
-                await resources.async_update_item(
-                    primary["id"],
-                    {"res_type": "module", "url": versioned_local},
-                )
-                _LOGGER.info("Updated Lovelace card resource to %s", versioned_local)
-            for extra in matching[1:]:
-                delete = getattr(resources, "async_delete_item", None)
-                if callable(delete):
-                    await delete(extra["id"])
+            for resource in matching:
+                path = _path_only(resource.get("url", ""))
+                versioned = f"{path}?v={VERSION}"
+                if resource.get("url") != versioned:
+                    await resources.async_update_item(
+                        resource["id"],
+                        {"res_type": "module", "url": versioned},
+                    )
+                    _LOGGER.info("Updated Lovelace card resource to %s", versioned)
             return
 
         await resources.async_create_item(
-            {"res_type": "module", "url": versioned_local}
+            {"res_type": "module", "url": versioned_static}
         )
-        _LOGGER.info("Registered Lovelace card resource %s", versioned_local)
+        _LOGGER.info("Registered Lovelace card resource %s", versioned_static)
