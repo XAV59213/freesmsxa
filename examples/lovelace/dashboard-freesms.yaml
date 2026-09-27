@@ -1,0 +1,63 @@
+# Free Mobile SMS XA — vue dashboard prête à coller
+#
+# Installation
+# 1. Tableau de bord → Modifier → 3 points → Éditeur brut
+# 2. Ajoute ce bloc dans views:
+# 3. Remplace les entity_id des capteurs par tes lignes
+#    Paramètres → Appareils et services → Free Mobile SMS XA → Entités
+#
+# La carte d’envoi native détecte toute seule notify.papa, notify.maman, etc.
+# Si elle n’apparaît pas : Paramètres → Tableaux de bord → ⋮ → Ressources
+#   URL : /freesmsxa/freesmsxa-send-card.js
+#   Type : Module JavaScript
+
+title: SMS
+path: freesms
+icon: mdi:message-processing-outline
+type: masonry
+cards:
+  - type: custom:freesmsxa-send-card
+    title: Envoyer un SMS
+
+  - type: grid
+    columns: 3
+    square: false
+    cards:
+      - type: tile
+        entity: sensor.papa_etat_sms
+        name: Papa
+        icon: mdi:account
+        vertical: true
+        tap_action:
+          action: more-info
+      - type: tile
+        entity: sensor.papa_sms_aujourdhui
+        name: Aujourd’hui
+        icon: mdi:calendar-today
+        vertical: true
+      - type: tile
+        entity: sensor.papa_sms_envoyes
+        name: Total
+        icon: mdi:counter
+        vertical: true
+
+  - type: markdown
+    title: Historique
+    content: >-
+      {% set log = state_attr('sensor.papa_etat_sms', 'sms_log') %}
+      {% set quota = state_attr('sensor.papa_etat_sms', 'quota_status') %}
+      {% set err = state_attr('sensor.papa_etat_sms', 'last_error') %}
+      **Quota :** {{ quota or 'ok' }}
+      {% if err %}
+      **Dernière erreur :** `{{ err }}`
+      {% endif %}
+
+      {% if log %}
+      {% for item in log[:8] %}
+      {% set ok = item.status == 'sent' %}
+      {{ '✅' if ok else '❌' }} {{ item.time | as_datetime | as_local | as_timestamp | timestamp_custom('%d/%m %H:%M', true) }}
+      — {{ item.message }}
+      {% endfor %}
+      {% else %}
+      Aucun SMS pour l’instant.
+      {% endif %}
