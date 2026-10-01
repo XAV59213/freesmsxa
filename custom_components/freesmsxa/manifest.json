@@ -9,6 +9,6 @@
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/XAV59213/freesmsxa/issues",
-  "requirements": ["freesms==0.2.0"],
+  "requirements": ["freesms>=0.2.0"],
   "version": "6.12.4"
 }
