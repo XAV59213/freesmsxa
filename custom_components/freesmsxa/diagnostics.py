@@ -10,7 +10,14 @@ from homeassistant.core import HomeAssistant
 
 from . import FreeSMSConfigEntry
 
-TO_REDACT = {CONF_ACCESS_TOKEN, "access_token", "token"}
+TO_REDACT = {
+    CONF_ACCESS_TOKEN,
+    "access_token",
+    "token",
+    "username",
+    "unique_id",
+    "title",
+}
 
 
 async def async_get_config_entry_diagnostics(
@@ -29,12 +36,15 @@ async def async_get_config_entry_diagnostics(
             },
             TO_REDACT,
         ),
-        "runtime": {
-            "alias": runtime.alias,
-            "username": runtime.username,
-            "has_phone_number": bool(runtime.phone_number),
-            "has_client": runtime.client is not None,
-        },
+        "runtime": async_redact_data(
+            {
+                "alias": runtime.alias,
+                "username": runtime.username,
+                "has_phone_number": bool(runtime.phone_number),
+                "has_client": runtime.client is not None,
+            },
+            TO_REDACT,
+        ),
         "sensor": None
         if sensor is None
         else {
@@ -42,6 +52,5 @@ async def async_get_config_entry_diagnostics(
             "sms_count": sensor.sms_count,
             "sms_today": sensor.sms_today,
             "quota_status": sensor.quota_status,
-            "sms_log": sensor.sms_log,
         },
     }
