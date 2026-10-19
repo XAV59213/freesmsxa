@@ -12,14 +12,13 @@ PLATFORMS = ["notify", "sensor", "button"]
 
 MANUFACTURER = "Free Mobile"
 MODEL = "SMS Gateway"
-VERSION = "6.12.4"
+VERSION = "6.12.5"
 
 SERVICE_SEND_SMS = "send_sms"
 ATTR_TARGET = "target"
 ATTR_MESSAGE = "message"
 
 URL_BASE = "/freesmsxa"
-LOCAL_CARD_PATH = "/local/freesmsxa-send-card.js"
 CARD_FILENAME = "freesmsxa-send-card.js"
 STATIC_CARD_PATH = f"{URL_BASE}/{CARD_FILENAME}"
 JSMODULES = [
