@@ -16,7 +16,6 @@ from homeassistant.helpers.event import async_call_later
 
 from ..const import (
     CARD_FILENAME,
-    LOCAL_CARD_PATH,
     STATIC_CARD_PATH,
     URL_BASE,
     VERSION,
@@ -42,19 +41,6 @@ def _resources(lovelace: Any) -> Any:
 
 def _path_only(url: str) -> str:
     return str(url).split("?", 1)[0]
-
-
-def _copy_card_to_www(hass: HomeAssistant) -> Path | None:
-    """Copy the card JS into /config/www so /local/ works as a fallback."""
-    try:
-        src = Path(__file__).parent / CARD_FILENAME
-        dest = Path(hass.config.path("www")) / CARD_FILENAME
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(src.read_bytes())
-        return dest
-    except OSError:
-        _LOGGER.warning("Could not copy Lovelace card to www")
-        return None
 
 
 class FreeSMSXACardView(HomeAssistantView):
@@ -92,10 +78,7 @@ class JSModuleRegistration:
         except Exception:  # noqa: BLE001
             _LOGGER.debug("Card HTTP view already registered")
 
-        await self.hass.async_add_executor_job(_copy_card_to_www, self.hass)
-
         add_extra_js_url(self.hass, f"{STATIC_CARD_PATH}?v={VERSION}")
-        add_extra_js_url(self.hass, f"{LOCAL_CARD_PATH}?v={VERSION}")
 
         if self.hass.is_running:
             await self._async_register_lovelace_resources()
@@ -169,7 +152,7 @@ class JSModuleRegistration:
 
     async def _async_sync_modules(self, resources: Any, items: list[dict]) -> None:
         """Keep existing resources, just bump the cache-bust version."""
-        wanted = {STATIC_CARD_PATH, LOCAL_CARD_PATH}
+        wanted = {STATIC_CARD_PATH}
         versioned_static = f"{STATIC_CARD_PATH}?v={VERSION}"
         matching = [
             item for item in items if _path_only(item.get("url", "")) in wanted
