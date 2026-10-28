@@ -3,5 +3,9 @@
   "content_in_root": false,
   "homeassistant": "2025.12.0",
   "render_readme": true,
-  "country": ["FR"]
+  "country": [
+    "FR"
+  ],
+  "zip_release": true,
+  "filename": "freesmsxa.zip"
 }

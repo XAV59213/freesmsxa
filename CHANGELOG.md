@@ -4,6 +4,12 @@ All notable changes to the Free Mobile SMS XA Home Assistant integration will be
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [Unreleased]
+
+### Changed
+
+- Publication / HACS : chaque release GitHub joint désormais l'archive **`freesmsxa.zip`** (contenu de `custom_components/freesmsxa`, sans `__pycache__` ni `.pyc`). `hacs.json` passe en `"zip_release": true` / `"filename": "freesmsxa.zip"` : HACS installe depuis ce zip et affiche un **compteur de téléchargements**. Nouveau workflow `release-zip.yaml` (release publiée à la main, lancement manuel, ou appelé par les workflows de release existants) qui vérifie que le tag correspond à la version de `manifest.json`. Aucun code de l'intégration modifié
+
 ## [6.12.0] - 2026-09-24
 
 ### Added

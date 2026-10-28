@@ -1,0 +1,136 @@
+name: Release zip HACS
+
+# Joint freesmsxa.zip (contenu de custom_components/freesmsxa, sans __pycache__ ni .pyc)
+# à la release GitHub : HACS l'installe (hacs.json zip_release) et compte ses téléchargements.
+#  - release publiée à la main (interface GitHub ou `gh release create`) : zip ajouté automatiquement
+#  - Actions > « Release zip HACS » > Run workflow : crée la release si besoin
+#    (tag vide = version de manifest.json), puis joint le zip ; sur une release existante, (re)joint le zip
+#  - appelé par les autres workflows de release du dépôt (workflow_call)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag de la release (vide = version de manifest.json)
+        required: false
+        default: ""
+        type: string
+      target:
+        description: Branche ou SHA cible si la release doit être créée
+        required: true
+        default: main
+        type: string
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      target:
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    name: Zip HACS
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-zip-${{ github.event.release.tag_name || inputs.tag || github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Construire et joindre le zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DOMAIN: freesmsxa
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          SRC="custom_components/$DOMAIN"
+          ZIP="$RUNNER_TEMP/$DOMAIN.zip"
+          TAG="${EVENT_TAG:-${INPUT_TAG:-}}"
+          TARGET="${INPUT_TARGET:-main}"
+          CREATE=0
+
+          if [ -z "$TAG" ]; then
+            git checkout -q "$TARGET"
+            TAG=$(jq -r '.version' "$SRC/manifest.json") || {
+              echo "::error::$SRC/manifest.json illisible sur $TARGET"
+              exit 1
+            }
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            git checkout -q "refs/tags/$TAG"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            CREATE=1
+            if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+              git checkout -q "refs/tags/$TAG"
+            else
+              git checkout -q "$TARGET"
+            fi
+          else
+            echo "::error::La release $TAG n'existe pas"
+            exit 1
+          fi
+
+          # Le tag (sans préfixe « v » / « v. ») doit être la version de manifest.json
+          MANIFEST_VERSION=$(jq -r '.version' "$SRC/manifest.json") || {
+            echo "::error::$SRC/manifest.json illisible sur $TAG"
+            exit 1
+          }
+          TAG_VERSION="${TAG#v}"
+          TAG_VERSION="${TAG_VERSION#.}"
+          if [ "$TAG_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::Le tag ($TAG) ne correspond pas à $SRC/manifest.json ($MANIFEST_VERSION) ; mettre la version du manifest à jour avant de publier"
+            exit 1
+          fi
+
+          # CONTENU de custom_components/<domain> à la racine du zip
+          # (HACS l'extrait dans custom_components/<domain>/), sans __pycache__ ni .pyc
+          python3 - "$SRC" "$ZIP" <<'PY'
+          import pathlib, sys, zipfile
+          src = pathlib.Path(sys.argv[1])
+          with zipfile.ZipFile(sys.argv[2], "w", zipfile.ZIP_DEFLATED) as zf:
+              for path in sorted(src.rglob("*")):
+                  rel = path.relative_to(src)
+                  if not path.is_file() or "__pycache__" in rel.parts or path.suffix in (".pyc", ".pyo"):
+                      continue
+                  zf.write(path, rel.as_posix())
+          PY
+          ZIP_VERSION=$(unzip -p "$ZIP" manifest.json | jq -r '.version')
+          if [ "$ZIP_VERSION" != "$MANIFEST_VERSION" ]; then
+            echo "::error::manifest.json du zip ($ZIP_VERSION) différent de $MANIFEST_VERSION"
+            exit 1
+          fi
+          for f in manifest.json __init__.py; do
+            unzip -l "$ZIP" "$f" >/dev/null || { echo "::error::$f absent de la racine du zip"; exit 1; }
+          done
+          if unzip -Z1 "$ZIP" | grep -Eq '(^|/)__pycache__/|\.py[co]$'; then
+            echo "::error::Le zip contient des fichiers compilés (__pycache__ / .pyc)"
+            exit 1
+          fi
+          echo "Archive $DOMAIN.zip : $(unzip -Z1 "$ZIP" | wc -l) fichiers, $(du -h "$ZIP" | cut -f1)"
+
+          if [ "$CREATE" = 1 ]; then
+            echo "Création de la release $TAG ($(git rev-parse --short HEAD))"
+            gh release create "$TAG" --target "$(git rev-parse HEAD)" --title "$TAG" --generate-notes "$ZIP"
+          else
+            gh release upload "$TAG" "$ZIP" --clobber
+          fi
+
+          gh release view "$TAG" --json assets -q '.assets[].name' | grep -qx "$DOMAIN.zip" || {
+            echo "::error::$DOMAIN.zip n'est pas joint à la release $TAG"
+            exit 1
+          }
+          echo "OK : $DOMAIN.zip joint à la release $TAG"

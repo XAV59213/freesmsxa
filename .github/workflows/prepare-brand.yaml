@@ -54,3 +54,11 @@ jobs:
           else
             gh release create "$TAG" --title "$TAG" --notes "HACS official store readiness: brand icons, translations, validation workflows, country FR."
           fi
+
+  zip:
+    name: Zip HACS
+    needs: prepare
+    if: ${{ github.event.inputs.create_release == 'true' }}
+    uses: ./.github/workflows/release-zip.yaml
+    with:
+      tag: ${{ github.event.inputs.tag }}
