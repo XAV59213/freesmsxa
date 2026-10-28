@@ -4,7 +4,7 @@ All notable changes to the Free Mobile SMS XA Home Assistant integration will be
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
-## [Unreleased]
+## [6.12.6] - 2026-10-28
 
 ### Changed
 

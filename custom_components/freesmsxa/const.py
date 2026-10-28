@@ -12,7 +12,7 @@ PLATFORMS = ["notify", "sensor", "button"]
 
 MANUFACTURER = "Free Mobile"
 MODEL = "SMS Gateway"
-VERSION = "6.12.5"
+VERSION = "6.12.6"
 
 SERVICE_SEND_SMS = "send_sms"
 ATTR_TARGET = "target"
