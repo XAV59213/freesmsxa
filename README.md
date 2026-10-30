@@ -1,6 +1,6 @@
 # 📨 Free Mobile SMS XA – Intégration Home Assistant
 
-![Logo](./images/logo.png)
+![Logo](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/logo.png)
 
 [![GitHub release](https://img.shields.io/github/v/release/XAV59213/freesmsxa)](https://github.com/XAV59213/freesmsxa/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?logo=home-assistant)](https://hacs.xyz/)
@@ -30,15 +30,15 @@
 
 ### 🛠 Interface de configuration
 
-![Configuration UI](./images/Capture%20d’écran%20du%202025-05-02%2011-11-45.png)
+![Configuration UI](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/Capture%20d’écran%20du%202025-05-02%2011-11-45.png)
 
 ### 🧩 Services configurés
 
-![Services configurés](./images/Capture%20d’écran%20du%202025-05-02%2011-12-06.png)
+![Services configurés](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/Capture%20d’écran%20du%202025-05-02%2011-12-06.png)
 
 ### 🔑 Interface Free Mobile (Clé API)
 
-![Free Mobile Token](./images/token.png)
+![Free Mobile Token](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/token.png)
 
 ---
 
