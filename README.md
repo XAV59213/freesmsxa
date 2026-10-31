@@ -134,7 +134,7 @@ Le capteur **État SMS** expose :
 
 - `sms_count` / `sms_today` / `quota_status` (`ok` ou `throttled`)
 - `last_error` (`quota_exceeded`, `invalid_auth`, …)
-- `sms_log` : 50 derniers envois (`status: sent|failed`)
+- `sms_log` : 50 derniers envois (`time`, `status: sent|failed`, `length`, `error`) — le texte des SMS n’est plus stocké (vie privée) et l’attribut n’est pas enregistré dans l’historique
 
 Deux capteurs numériques permettent de grapher **SMS envoyés** et **SMS aujourd’hui**.
 
@@ -151,7 +151,7 @@ content: >
   {% set log = state_attr('sensor.free_mobile_sms_papa_etat_sms', 'sms_log') %}
   {% if log %}
   {% for item in log %}
-  • **{{ item.time }}** [{{ item.status }}] {{ item.message }}
+  • **{{ item.time }}** [{{ item.status }}] {{ item.length }} caractères
   {% endfor %}
   {% else %}
   Aucun SMS.

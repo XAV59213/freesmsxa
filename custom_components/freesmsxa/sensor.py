@@ -35,6 +35,8 @@ class FreeSMSSensor(RestoreEntity, SensorEntity):
     _attr_translation_key = "sms_status"
     _attr_icon = "mdi:message-text"
     _attr_should_poll = False
+    # Keep personal data out of the recorder / history database.
+    _unrecorded_attributes = frozenset({"sms_log", "username", "phone_number"})
 
     def __init__(self, entry: FreeSMSConfigEntry) -> None:
         username = entry.data[CONF_USERNAME]
@@ -100,7 +102,12 @@ class FreeSMSSensor(RestoreEntity, SensorEntity):
         self._quota_status = attrs.get("quota_status") or "ok"
         log = attrs.get("sms_log") or []
         if isinstance(log, list):
-            self._sms_log = log[:SMS_LOG_MAX]
+            # Drop any message text stored by older versions.
+            self._sms_log = [
+                {k: v for k, v in item.items() if k != "message"}
+                for item in log[:SMS_LOG_MAX]
+                if isinstance(item, dict)
+            ]
         if last_state.state not in (None, "unknown", "unavailable"):
             self._attr_native_value = last_state.state
         self._rollover_today()
@@ -117,7 +124,6 @@ class FreeSMSSensor(RestoreEntity, SensorEntity):
         self._sms_log.insert(
             0,
             {
-                "message": message or "SMS envoyé",
                 "time": self._last_sent,
                 "status": "sent",
                 "length": len(message or ""),
@@ -138,7 +144,6 @@ class FreeSMSSensor(RestoreEntity, SensorEntity):
         self._sms_log.insert(
             0,
             {
-                "message": message or "",
                 "time": dt_util.now().isoformat(),
                 "status": "failed",
                 "error": error_key,

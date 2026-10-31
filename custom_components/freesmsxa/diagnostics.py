@@ -17,6 +17,9 @@ TO_REDACT = {
     "username",
     "unique_id",
     "title",
+    "phone_number",
+    "message",
+    "sms_log",
 }
 
 
