@@ -2,12 +2,10 @@
 
 ![Logo](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/logo.png)
 
-[![GitHub release](https://img.shields.io/github/v/release/XAV59213/freesmsxa)](https://github.com/XAV59213/freesmsxa/releases)
-[![Downloads](https://img.shields.io/github/downloads/XAV59213/freesmsxa/total.svg?label=Downloads)](https://github.com/XAV59213/freesmsxa/releases)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?logo=home-assistant)](https://hacs.xyz/)
-[![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](./LICENSE)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz) [![Release](https://img.shields.io/github/v/release/XAV59213/freesmsxa?label=release)](https://github.com/XAV59213/freesmsxa/releases/latest) [![Hassfest](https://img.shields.io/github/actions/workflow/status/XAV59213/freesmsxa/hassfest.yaml?branch=main&label=Hassfest&logo=github)](https://github.com/XAV59213/freesmsxa/actions/workflows/hassfest.yaml) [![HACS validation](https://img.shields.io/github/actions/workflow/status/XAV59213/freesmsxa/validate.yaml?branch=main&label=HACS%20validation&logo=github)](https://github.com/XAV59213/freesmsxa/actions/workflows/validate.yaml) [![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](LICENSE) [![Downloads](https://img.shields.io/github/downloads/XAV59213/freesmsxa/total.svg?label=Downloads)](https://github.com/XAV59213/freesmsxa/releases) [![Version](https://img.shields.io/github/v/release/XAV59213/freesmsxa?label=VERSION&color=blue)](https://github.com/XAV59213/freesmsxa/releases/latest) [![Home Assistant](https://img.shields.io/badge/HOME%20ASSISTANT-%3E%3D2025.12.0-41BDF5.svg)](https://www.home-assistant.io)
 
-<a href="https://www.buymeacoffee.com/xav59213"> <img src="https://img.buymeacoffee.com/button-api/?text=xav59213&emoji=&slug=xav59213&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" />
+[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=xav59213&emoji=&slug=xav59213&button_colour=5F7FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/xav59213)
+
 
 **Free Mobile SMS XA** est une intégration personnalisée pour [Home Assistant](https://www.home-assistant.io/) qui permet d’envoyer des notifications **par SMS** via l’API gratuite de Free Mobile. Elle prend en charge plusieurs lignes, crée des entités (capteurs, boutons, `notify`) et offre une carte Lovelace native.
 
