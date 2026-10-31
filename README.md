@@ -59,8 +59,6 @@ Shortcut:
 
 ## 🧰 Installation
 
-### 📦 Via HACS (recommandé)
-
 1. Ouvre **HACS > Intégrations**
 2. Clique sur **les trois points > Dépôts personnalisés**
 3. Ajoute :
