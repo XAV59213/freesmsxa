@@ -36,11 +36,11 @@
 
 ### 🛠 Interface de configuration
 
-![Configuration UI](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/Capture%20d’écran%20du%202025-05-02%2011-11-45.png)
+![Configuration UI](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/Capture%20d%E2%80%99%C3%A9cran%20du%202025-05-02%2011-11-45.png)
 
 ### 🧩 Services configurés
 
-![Services configurés](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/Capture%20d’écran%20du%202025-05-02%2011-12-06.png)
+![Services configurés](https://raw.githubusercontent.com/XAV59213/freesmsxa/main/images/Capture%20d%E2%80%99%C3%A9cran%20du%202025-05-02%2011-12-06.png)
 
 ### 🔑 Interface Free Mobile (Clé API)
 
@@ -174,7 +174,7 @@ Les IDs d’entités dépendent du nom de la ligne. Vérifie-les dans **Paramèt
 
 ## 🧰 Licence
 
-Distribué sous **GNU LGPL v2.1** – [Voir la licence](./LICENSE)
+Distribué sous **GNU LGPL v2.1** – [Voir la licence](https://github.com/XAV59213/freesmsxa/blob/main/LICENSE)
 
 ---
 
