@@ -20,6 +20,8 @@ TO_REDACT = {
     "phone_number",
     "message",
     "sms_log",
+    "name",
+    "alias",
 }
 
 

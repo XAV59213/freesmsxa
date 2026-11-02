@@ -36,7 +36,7 @@ class FreeSMSSensor(RestoreEntity, SensorEntity):
     _attr_icon = "mdi:message-text"
     _attr_should_poll = False
     # Keep personal data out of the recorder / history database.
-    _unrecorded_attributes = frozenset({"sms_log", "username", "phone_number"})
+    _unrecorded_attributes = frozenset({"sms_log"})
 
     def __init__(self, entry: FreeSMSConfigEntry) -> None:
         username = entry.data[CONF_USERNAME]
@@ -170,8 +170,6 @@ class FreeSMSSensor(RestoreEntity, SensorEntity):
             "last_error": self._last_error,
             "quota_status": self._quota_status,
             "alias": self._alias,
-            "username": self._username,
-            "phone_number": self._phone_number or "Non renseigné",
             "sms_log": self._sms_log,
         }
 

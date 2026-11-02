@@ -1,6 +1,9 @@
 const CARD_TAG = "freesmsxa-send-card";
 const EDITOR_TAG = "freesmsxa-send-card-editor";
 
+const escapeHtml = (value) =>
+  String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
 class FreeSMSXASendCard extends HTMLElement {
   constructor() {
     super();
@@ -129,19 +132,19 @@ class FreeSMSXASendCard extends HTMLElement {
       </style>
       <ha-card>
         <div class="wrap">
-          <h2 id="title">${labels.title}</h2>
+          <h2 id="title">${escapeHtml(labels.title)}</h2>
           <div>
-            <label id="dest-label">${labels.dest}</label>
+            <label id="dest-label">${escapeHtml(labels.dest)}</label>
             <select id="dest"></select>
           </div>
           <div style="display:flex;flex-direction:column;flex:1;min-height:0;">
             <div class="row-label">
-              <label id="msg-label">${labels.message}</label>
+              <label id="msg-label">${escapeHtml(labels.message)}</label>
               <span class="count" id="count">0 / 160</span>
             </div>
-            <textarea id="msg" maxlength="160" placeholder="${labels.placeholder}"></textarea>
+            <textarea id="msg" maxlength="160" placeholder="${escapeHtml(labels.placeholder)}"></textarea>
           </div>
-          <div class="actions"><button id="send">${labels.send}</button></div>
+          <div class="actions"><button id="send">${escapeHtml(labels.send)}</button></div>
           <div class="status" id="status"></div>
         </div>
       </ha-card>
@@ -179,8 +182,8 @@ class FreeSMSXASendCard extends HTMLElement {
     const labels = this._labels();
     const targets = this._notifyEntities();
     const current = this._els.dest.value || this._dest;
-    const html = [`<option value="__all__">${labels.all}</option>`]
-      .concat(targets.map((id) => `<option value="${id}">${this._nameOf(id)}</option>`))
+    const html = [`<option value="__all__">${escapeHtml(labels.all)}</option>`]
+      .concat(targets.map((id) => `<option value="${escapeHtml(id)}">${escapeHtml(this._nameOf(id))}</option>`))
       .join("");
     if (this._els.dest.innerHTML !== html) this._els.dest.innerHTML = html;
     this._dest = targets.includes(current) || current === "__all__" ? current : "__all__";
@@ -233,7 +236,7 @@ class FreeSMSXASendCardEditor extends HTMLElement {
       </style>
       <div class="box">
         <label>Titre</label>
-        <input id="title" type="text" value="${this._config.title || ""}" placeholder="Envoyer un SMS" />
+        <input id="title" type="text" value="${escapeHtml(this._config.title || "")}" placeholder="Envoyer un SMS" />
       </div>
     `;
     this.shadowRoot.getElementById("title").addEventListener("change", (ev) => {
