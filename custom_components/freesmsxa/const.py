@@ -6,6 +6,8 @@ CONF_TEST_MESSAGE = "test_message"
 CONF_SEND_TEST_SMS = "send_test_sms"
 CONF_DEBUG = "debug"
 
+DEFAULT_LINE_NAME = "Free Mobile SMS"
+
 DEFAULT_TEST_MESSAGE = "Test SMS envoyé depuis Home Assistant"
 
 PLATFORMS = ["notify", "sensor", "button"]
@@ -49,3 +51,6 @@ API_STATUS_ERRORS = {
     API_STATUS_FORBIDDEN: "invalid_auth",
     API_STATUS_SERVER: "server_error",
 }
+
+# Per-request connect/read timeouts in seconds (not a total wall-clock deadline).
+API_TIMEOUT = (10, 30)

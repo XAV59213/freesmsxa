@@ -56,7 +56,7 @@ cards:
       {% for item in log[:8] %}
       {% set ok = item.status == 'sent' %}
       {{ '✅' if ok else '❌' }} {{ item.time | as_datetime | as_local | as_timestamp | timestamp_custom('%d/%m %H:%M', true) }}
-      — {{ item.message }}
+      — {{ item.length }} caractères{% if item.error %} — {{ item.error }}{% endif %}
       {% endfor %}
       {% else %}
       Aucun SMS pour l’instant.

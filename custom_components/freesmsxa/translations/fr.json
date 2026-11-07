@@ -10,6 +10,13 @@
           "name": "Nom de l'appareil (optionnel)",
           "phone_number": "Numéro de téléphone (optionnel)",
           "send_test_sms": "Envoyer un SMS de validation"
+        },
+        "data_description": {
+          "username": "Identifiant de la ligne Free Mobile dont les notifications SMS sont activées.",
+          "access_token": "Clé API des notifications SMS de cette ligne, pas le mot de passe du compte.",
+          "name": "Nom d’affichage de la ligne. Si vide, Free Mobile SMS est utilisé, jamais l’identifiant du compte.",
+          "phone_number": "Numéro français facultatif, conservé pour information ; l’API envoie uniquement à sa propre ligne.",
+          "send_test_sms": "Envoie un vrai SMS pour vérifier les identifiants. Désactiver ignore cette vérification."
         }
       },
       "reconfigure": {
@@ -19,6 +26,21 @@
           "access_token": "Clé API",
           "name": "Nom de l'appareil",
           "phone_number": "Numéro de téléphone (optionnel)"
+        },
+        "data_description": {
+          "access_token": "Clé API des notifications SMS de cette ligne, pas le mot de passe du compte.",
+          "name": "Nom d’affichage de la ligne. Si vide, l’alias existant est conservé. Les noms personnalisés du registre ne sont pas remplacés.",
+          "phone_number": "Numéro français facultatif, conservé pour information ; l’API envoie uniquement à sa propre ligne."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Réauthentifier Free Mobile SMS XA",
+        "description": "Saisissez la nouvelle clé API pour cette ligne. Valider envoie un vrai SMS de vérification ; ouvrir ce formulaire n’en envoie pas.",
+        "data": {
+          "access_token": "Clé API"
+        },
+        "data_description": {
+          "access_token": "Nouvelle clé des notifications SMS de la même ligne Free Mobile."
         }
       }
     },
@@ -35,7 +57,9 @@
     },
     "abort": {
       "already_configured": "Ce compte Free Mobile est déjà configuré.",
-      "reconfigure_successful": "Reconfiguration réussie."
+      "reconfigure_successful": "Reconfiguration réussie.",
+      "wrong_account": "Cette clé ne correspond pas à la ligne existante.",
+      "reauth_successful": "Réauthentification réussie."
     }
   },
   "options": {
@@ -45,30 +69,68 @@
         "data": {
           "test_message": "Message du SMS de test",
           "debug": "Activer les logs de débogage"
+        },
+        "data_description": {
+          "test_message": "Texte envoyé uniquement lors de l’appui sur le bouton Test SMS.",
+          "debug": "Active les logs de diagnostic de l’intégration, sans texte SMS ni identifiant de ligne."
         }
       }
     }
   },
   "entity": {
     "sensor": {
-      "sms_status": { "name": "État SMS" },
-      "sms_count": { "name": "SMS envoyés" },
-      "sms_today": { "name": "SMS aujourd'hui" }
+      "sms_status": {
+        "name": "État SMS"
+      },
+      "sms_count": {
+        "name": "SMS envoyés"
+      },
+      "sms_today": {
+        "name": "SMS aujourd'hui"
+      }
     },
     "button": {
-      "test_sms": { "name": "Test SMS" }
+      "test_sms": {
+        "name": "Test SMS"
+      }
+    },
+    "notify": {
+      "sms": {
+        "name": "SMS"
+      }
     }
   },
   "exceptions": {
-    "invalid_target": { "message": "Cible notify inconnue : {target}" },
-    "invalid_auth": { "message": "Free Mobile a refusé les identifiants ou les notifications SMS sont désactivées (HTTP 403)." },
-    "invalid_message": { "message": "Le SMS a été refusé par Free Mobile (paramètre manquant ou invalide, HTTP 400)." },
-    "empty_message": { "message": "Impossible d'envoyer un SMS vide." },
-    "message_too_long": { "message": "Le message est trop long (maximum {max} caractères)." },
-    "quota_exceeded": { "message": "Limite d'envoi Free Mobile atteinte (HTTP 402). Attendez avant de renvoyer." },
-    "server_error": { "message": "Erreur serveur Free Mobile (HTTP 500). Réessayez plus tard." },
-    "api_error": { "message": "Erreur de l'API Free Mobile (HTTP {status})." },
-    "connection_error": { "message": "Impossible de joindre l'API Free Mobile." }
+    "invalid_target": {
+      "message": "Cible notify inconnue : {target}"
+    },
+    "invalid_auth": {
+      "message": "Free Mobile a refusé les identifiants ou les notifications SMS sont désactivées (HTTP 403)."
+    },
+    "invalid_message": {
+      "message": "Le SMS a été refusé par Free Mobile (paramètre manquant ou invalide, HTTP 400)."
+    },
+    "empty_message": {
+      "message": "Impossible d'envoyer un SMS vide."
+    },
+    "message_too_long": {
+      "message": "Le message est trop long (maximum {max} caractères)."
+    },
+    "quota_exceeded": {
+      "message": "Limite d'envoi Free Mobile atteinte (HTTP 402). Attendez avant de renvoyer."
+    },
+    "server_error": {
+      "message": "Erreur serveur Free Mobile (HTTP 500). Réessayez plus tard."
+    },
+    "api_error": {
+      "message": "Erreur de l'API Free Mobile (HTTP {status})."
+    },
+    "connection_error": {
+      "message": "Impossible de joindre l'API Free Mobile."
+    },
+    "unsupported_ha_contract": {
+      "message": "Impossible de préserver le nom de compatibilité existant de cette entité avec cette version de Home Assistant. Utilisez une version testée avant de réessayer."
+    }
   },
   "services": {
     "send_sms": {

@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity
-from homeassistant.const import CONF_NAME, CONF_USERNAME
+from homeassistant.const import CONF_NAME, CONF_USERNAME, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FreeSMSConfigEntry
 from .const import CONF_TEST_MESSAGE, DEFAULT_TEST_MESSAGE
 from .helpers import async_send_and_record, build_device_info
+
+
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
@@ -26,7 +29,9 @@ class TestSMSButton(ButtonEntity):
 
     _attr_has_entity_name = True
     _attr_translation_key = "test_sms"
-    _attr_icon = "mdi:message-alert-outline"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    # Optional troubleshooting action; existing registry choices are preserved.
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, entry: FreeSMSConfigEntry) -> None:
         self._entry = entry
@@ -40,5 +45,4 @@ class TestSMSButton(ButtonEntity):
         """Send the current test message from options."""
         message = self._entry.options.get(CONF_TEST_MESSAGE, DEFAULT_TEST_MESSAGE)
         await async_send_and_record(self.hass, self._entry, message, source="button")
-        self._attr_icon = "mdi:check-circle-outline"
         self.async_write_ha_state()

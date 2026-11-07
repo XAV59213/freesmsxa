@@ -1,0 +1,9 @@
+# Environnement séparé Python 3.13 ; ne pas combiner avec requirements-test.txt.
+homeassistant==2025.12.0
+freesms==0.3.0
+pytest==9.2.0
+pytest-asyncio==1.4.1.post1
+pytest-cov==7.1.0
+PyYAML==6.0.3
+# aiodns historique ne supporte pas pycares 5 ; voir aio-libs/aiodns#214.
+pycares==4.11.0

@@ -1,0 +1,7 @@
+homeassistant==2026.11.0
+freesms==0.3.0
+pytest==9.2.0
+pytest-asyncio==1.4.1.post1
+pytest-cov==7.1.0
+PyYAML==6.0.3
+mypy==2.4.1

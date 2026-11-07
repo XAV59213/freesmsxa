@@ -10,6 +10,13 @@
           "name": "Device name (optional)",
           "phone_number": "Phone number (optional)",
           "send_test_sms": "Send a validation SMS"
+        },
+        "data_description": {
+          "username": "User ID of the Free Mobile line with SMS notifications enabled.",
+          "access_token": "SMS notification API key for this line, not the account password.",
+          "name": "Display name for this line. If empty, Free Mobile SMS is used, never the account user ID.",
+          "phone_number": "Optional French phone number, stored for reference; the API only sends to its own line.",
+          "send_test_sms": "Sends a real SMS to validate the credentials. Disabling this skips validation."
         }
       },
       "reconfigure": {
@@ -19,6 +26,21 @@
           "access_token": "API key",
           "name": "Device name",
           "phone_number": "Phone number (optional)"
+        },
+        "data_description": {
+          "access_token": "SMS notification API key for this line, not the account password.",
+          "name": "Display name for this line. If empty, the existing alias is retained. Custom registry names are not overwritten.",
+          "phone_number": "Optional French phone number, stored for reference; the API only sends to its own line."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate Free Mobile SMS XA",
+        "description": "Enter the new API key for this line. Submitting sends a real validation SMS; opening this form does not.",
+        "data": {
+          "access_token": "API key"
+        },
+        "data_description": {
+          "access_token": "New SMS notification API key for the same Free Mobile line."
         }
       }
     },
@@ -35,7 +57,9 @@
     },
     "abort": {
       "already_configured": "This Free Mobile account is already configured.",
-      "reconfigure_successful": "Reconfiguration successful."
+      "reconfigure_successful": "Reconfiguration successful.",
+      "wrong_account": "The credentials do not match the existing line.",
+      "reauth_successful": "Reauthentication successful."
     }
   },
   "options": {
@@ -45,30 +69,68 @@
         "data": {
           "test_message": "Test SMS message",
           "debug": "Enable debug logging"
+        },
+        "data_description": {
+          "test_message": "Text sent only when the Test SMS button is pressed.",
+          "debug": "Enable integration debug logging without SMS content or line user IDs."
         }
       }
     }
   },
   "entity": {
     "sensor": {
-      "sms_status": { "name": "SMS status" },
-      "sms_count": { "name": "SMS sent" },
-      "sms_today": { "name": "SMS today" }
+      "sms_status": {
+        "name": "SMS status"
+      },
+      "sms_count": {
+        "name": "SMS sent"
+      },
+      "sms_today": {
+        "name": "SMS today"
+      }
     },
     "button": {
-      "test_sms": { "name": "Test SMS" }
+      "test_sms": {
+        "name": "Test SMS"
+      }
+    },
+    "notify": {
+      "sms": {
+        "name": "SMS"
+      }
     }
   },
   "exceptions": {
-    "invalid_target": { "message": "Unknown notify target: {target}" },
-    "invalid_auth": { "message": "Free Mobile rejected the credentials or SMS notifications are disabled (HTTP 403)." },
-    "invalid_message": { "message": "The SMS was rejected by Free Mobile (missing or invalid parameter, HTTP 400)." },
-    "empty_message": { "message": "Cannot send an empty SMS." },
-    "message_too_long": { "message": "The message is too long (max {max} characters)." },
-    "quota_exceeded": { "message": "Free Mobile rate limit reached (HTTP 402). Wait before sending again." },
-    "server_error": { "message": "Free Mobile server error (HTTP 500). Try again later." },
-    "api_error": { "message": "Free Mobile API error (HTTP {status})." },
-    "connection_error": { "message": "Unable to reach the Free Mobile API." }
+    "invalid_target": {
+      "message": "Unknown notify target: {target}"
+    },
+    "invalid_auth": {
+      "message": "Free Mobile rejected the credentials or SMS notifications are disabled (HTTP 403)."
+    },
+    "invalid_message": {
+      "message": "The SMS was rejected by Free Mobile (missing or invalid parameter, HTTP 400)."
+    },
+    "empty_message": {
+      "message": "Cannot send an empty SMS."
+    },
+    "message_too_long": {
+      "message": "The message is too long (max {max} characters)."
+    },
+    "quota_exceeded": {
+      "message": "Free Mobile rate limit reached (HTTP 402). Wait before sending again."
+    },
+    "server_error": {
+      "message": "Free Mobile server error (HTTP 500). Try again later."
+    },
+    "api_error": {
+      "message": "Free Mobile API error (HTTP {status})."
+    },
+    "connection_error": {
+      "message": "Unable to reach the Free Mobile API."
+    },
+    "unsupported_ha_contract": {
+      "message": "Unable to preserve this entity’s existing compatibility name on this Home Assistant version. Use a tested Home Assistant version before retrying."
+    }
   },
   "services": {
     "send_sms": {

@@ -1,0 +1,25 @@
+{
+  "entity": {
+    "sensor": {
+      "sms_status": {
+        "default": "mdi:message-text"
+      },
+      "sms_count": {
+        "default": "mdi:counter"
+      },
+      "sms_today": {
+        "default": "mdi:calendar-today"
+      }
+    },
+    "button": {
+      "test_sms": {
+        "default": "mdi:message-alert-outline"
+      }
+    },
+    "notify": {
+      "sms": {
+        "default": "mdi:message-text"
+      }
+    }
+  }
+}

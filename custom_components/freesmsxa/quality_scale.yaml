@@ -1,0 +1,275 @@
+# Round7 LOCAL ; aucune revendication de niveau officiel.
+# Base 47eaf170614c44aadcdf1e97b22b41ed97611815 ; manifest6.12.12/freesms>=0.2 inchangés.
+# P=preuve patch ; E=exemption motivée ; M=écart/partiel ; V=admission externe.
+# Références du checkout corrigé ; lignes/hashes exacts dans round7-evidence/source-map.txt.
+rules:
+  # Bronze / P — __init__.py:66-117; tests/test_round2.py
+  action-setup:
+    status: done
+    comment: >-
+      Action enregistrée dans async_setup sans entrée ; handler de cible invalide testé.
+  # Bronze / E — sensor.py:63-73,242-281; helpers.py:129-224
+  appropriate-polling:
+    status: exempt
+    comment: >-
+      Aucun polling distant : envoi à la demande, compteurs locaux ; pas d’intervalle réseau à choisir. Le manifest cloud_polling est trompeur.
+  # Bronze / V — brand/icon.png; brand/icon@2x.png; round6-evidence/brands-core-tree.json; brands-custom-tree.json; official-rule-excerpts.json
+  brands:
+    status: todo
+    comment: >-
+      Actifs locaux256/512 transparents validés, mécanisme custom récent distinct de la règle core. Arbres complets core1583/custom4022 sans freesmsxa ; règle officielle exige core_integrations et ne prévoit aucune exception. Admission/publication externe requise si candidature core ; aucune PR faite/autorisée. Pas de conformité core déduite du seul branding local HACS ni absence globale déduite d’un404. Preuves et décision rounds4–6 réutilisées sans nouvelle recherche réseau round7 ; aucun changement de dépendance/publication.
+  # Bronze / P — helpers.py:48-224; __init__.py:40-63
+  common-modules:
+    status: done
+    comment: >-
+      Aucun DataUpdateCoordinator ni classe Entity de base partagée à déplacer. Les helpers communs sont centralisés. La règle officielle précise qu’il n’y a rien à déplacer dans ce cas, pas une exemption.
+  # Bronze / P — config_flow.py:40-236; strings.json; tests/test_round2.py
+  config-flow:
+    status: done
+    comment: >-
+      Formulaires UI avec contexte EN/FR pour tous champs, sélecteur password sur la clé, séparation data/options et validation téléphone. Tests de vrais formulaires/schémas HA, doublon, erreurs et résultats. Alias existant conservé pour compatibilité ; pas certification UI navigateur.
+  # Bronze / P — config_flow.py; schema.py; tests/test_round2.py; tests/test_round6.py; tests/test_round7.py; round7-evidence/coverage.json
+  config-flow-test-coverage:
+    status: done
+    comment: >-
+      Config_flow100 % lignes/branches ; vrais formulaires/flows HA, doublons,opt-out,reauth/reconfigure/options, validations/erreurs. Nouveaux tests de données invalides via vrai FlowManager, sans aucun client construit/envoi ; moteur de schéma HA réel pour types et runtime. Le même probe invalidation passait déjà au round6 via bridge HA, pas panne UI inventée. Pas navigateur ni CI distante.
+  # Bronze / M — manifest.json:19-22; round6-evidence/freesms02-source-verification.json; freesms02-workflow.txt; docs/TRANSPORT_DECISION.md; round4-evidence/hassfest-rejected-pin.log
+  dependency-transparency:
+    status: todo
+    comment: >-
+      Source0.2 wheel/sdist/overlay identique au tag MIT public f422cbf ; workflow du tag construit/teste mais ne publie pas. Provenance endpoints404 ne prouve pas publication manuelle : chaîne publique de publication non établie.0.3attesté prouvé auparavant. Manifest>=0.2 non épinglé ; pin0.3 incompatible core==0.2. Pas de done par simple correspondance de source ou attestation0.3. Preuves et décision rounds4–6 réutilisées sans nouvelle recherche réseau round7 ; aucun changement de dépendance/publication.
+  # Bronze / P — README.md:85-115; services.yaml; __init__.py:70-103; notify.py:45-49
+  docs-actions:
+    status: done
+    comment: >-
+      Documentation HACS : exemples notify.send_message et freesmsxa.send_sms, paramètres target/message et formes de cible. Correspondance contrôlée avec les handlers, pas avec le README seul.
+  # Bronze / E — inventaire complet; aucune condition personnalisée
+  docs-conditions:
+    status: exempt
+    comment: >-
+      Aucune condition propre à l’intégration (pas de module conditions ni device_condition). Les conditions HA génériques ne constituent pas une fonctionnalité à documenter ici.
+  # Bronze / P — README.md:17-31; helpers.py:129-161
+  docs-high-level-description:
+    status: done
+    comment: >-
+      Description de l’API Free Mobile et envoi SMS, confirmée par la dépendance et le chemin d’envoi réel (mocké).
+  # Bronze / P — README.md:51-81; manifest.json:10; config_flow.py:45-102
+  docs-installation-instructions:
+    status: done
+    comment: >-
+      Étapes HACS, redémarrage, ajout UI et activation Notifications SMS chez Free. Flow correspondant présent et exercé ; installation HACS réelle non exécutée.
+  # Bronze / P — README.md:Suppression; __init__.py:153-155
+  docs-removal-instructions:
+    status: done
+    comment: >-
+      Suppression entrée par ligne, désinstallation HACS/redémarrage, cartes/ressource JS et rétention historique/sauvegardes documentées. Suppression réelle non exécutée sur une maison HA.
+  # Bronze / E — const.py:36-37; helpers.py:199-224; inventaire complet
+  docs-triggers:
+    status: exempt
+    comment: >-
+      Pas de trigger propre exposé par la nouvelle API de triggers, ni device_trigger ; uniquement événements de bus SMS sent/failed (déjà cités README:143). Documenter leur payload reste utile, sans confondre événement et trigger fourni.
+  # Bronze / E — sensor.py:135-171; notify.py:31-49; button.py:27-48
+  entity-event-setup:
+    status: exempt
+    comment: >-
+      Les entités ne souscrivent à aucun événement externe ; statut mis à jour directement par helpers. RestoreEntity gère son propre cycle HA. Le listener frontend global n’est pas un abonnement d’entité.
+  # Bronze / P — sensor.py:75-94,251-277; button.py:36-42; notify.py:37-43; tests/test_round3.py
+  entity-unique-id:
+    status: done
+    comment: >-
+      Les cinq entités ont des unique_id stables et distincts dans une entrée ; une seule entrée par username.
+  # Bronze / P — migration.py; notify.py; tests/test_round5.py; tests/test_round6.py; tests/test_round7.py; round7-evidence/native-contracts.json
+  has-entity-name:
+    status: done
+    comment: >-
+      Cinq classes has_entity_name ; migration publique par défaut, noms/IDs/personnalisations préservés. Seul cache compat_name existant garde shim privé : Protocol précis, signature native liée avant appel et échec fermé traduit sans noms privés en cas de dérive. Vrais contrats HA2026 et absence du keyword sur2025 testés ; aucune invocation privée sur ancien HA. Pas suppression du shim déguisée ou garantie toutes versions ; limites friendly_name documentées.
+  # Bronze / P — __init__.py:40-63,120-150; sensor.py:75-94
+  runtime-data:
+    status: done
+    comment: >-
+      Client et données par entrée dans ConfigEntry[FreeSMSRuntimeData].runtime_data ; hass.data conserve seulement un conteneur global vide, pas les clients.
+  # Bronze / M — config_flow.py:45-102; tests/test_local_audit.py; round6-evidence/official-rule-excerpts.json; docs/REMAINING_ACTIONS.md
+  test-before-configure:
+    status: todo
+    comment: >-
+      Opt-out send_test_sms=False conservé : création sans vérification de clé. Exceptions officielles helpers/découverte sans paramètres, pas exception write-only explicite. Exemption setup ne se transfère pas. Décision produit requise : garder opt-out sans revendiquer ce critère, consentir SMS obligatoire à la création, ou disposer de validation documentée sans effet de bord. Aucun SMS au setup ajouté.
+  # Bronze / E — __init__.py:120-150; tests/test_round6.py; round5-evidence/supported-client-capabilities.json; round6-evidence/official-rule-excerpts.json
+  test-before-setup:
+    status: exempt
+    comment: >-
+      Exception officielle explicite : intégration qui ne peut pas vérifier sa configuration pendant setup. SDK supportés0.2/0.3 seulement constructeur/send_sms, pas lecture authentifiée ; test enverrait SMS. Vrai loader/domaine/entry/platforms et unload/reload2025/2026 prouvent aucun appel SMS, ouverture reauth silencieuse ; I/O seulement sur action/soumission explicite mockée. Exemption locale motivée, distincte de test-before-configure.
+  # Bronze / P — config_flow.py:45-60; tests/test_round2.py
+  unique-config-entry:
+    status: done
+    comment: >-
+      Identifiant normalisé par strip puis async_set_unique_id(username) et _abort_if_unique_id_configured avant le réseau.
+  # Silver / P — helpers.py:91-126,164-224; __init__.py:70-103; tests/test_round2.py
+  action-exceptions:
+    status: done
+    comment: >-
+      Validation en ServiceValidationError, erreurs API/réseau en HomeAssistantError traduit ; sous-classe auth403 déclenche reauth puis erreur propagée. Registre de services HA natif : routes notify legacy/moderne, cible inconnue et erreur sous-jacente propagée. Pas de secrets request dans logs/traceback.
+  # Silver / P — __init__.py:153-155; config_flow.py:210-236; tests/test_round2.py
+  config-entry-unloading:
+    status: done
+    comment: >-
+      Décharge les trois plateformes. Listener générique retiré ; OptionsFlowWithReload natif assure un seul reload lors d’un changement d’options, aucun si inchangées. Évite double reload avec reauth/reconfigure. Contrats natifs options et délégation unload testés, pas cycle complet d’installation HA.
+  # Silver / P — README.md:Options et reconfiguration; config_flow.py:210-236
+  docs-configuration-parameters:
+    status: done
+    comment: >-
+      Les deux options test_message/debug sont documentées avec défauts, portée, effet SMS, limite du message et niveau de logger partagé. Vérifié face au flow/bouton/helpers.
+  # Silver / P — README.md:Paramètres de configuration; config_flow.py:45-102
+  docs-installation-parameters:
+    status: done
+    comment: >-
+      Cinq champs documentés avec obligations/défauts, téléphone et SMS réellement envoyé seulement sur validation choisie. Nouveau nom par défaut Free Mobile SMS sans compte ; alias/titres/IDs hérités restent inchangés pour compatibilité. Effets de migration et noms complets explicités ; schémas et tests recoupés.
+  # Silver / M — sensor.py:102-110; helpers.py:184-224; tests/test_round4.py; tests/test_round6.py; docs/REMAINING_ACTIONS.md
+  entity-unavailable:
+    status: todo
+    comment: >-
+      Statut unavailable sur échec transport, retour sur réponse HTTP sans confondre auth/quota et livraison. Compteurs locaux valides ; notify et bouton activé utilisables pour retry. Vrai loader/domaine/entry/forwarding/services/unload/reload et panne/recovery testés aux deux HA sans setup/poll SMS. Acceptation de cette politique write-only face à règle générale reste à revoir, pas exemption ni commandes bloquées artificiellement.
+  # Silver / P — manifest.json:7-9
+  integration-owner:
+    status: done
+    comment: >-
+      codeowners contient @XAV59213. Présence du responsable vérifiée, pas sa disponibilité future.
+  # Silver / P — __init__.py:51-60; helpers.py:184-214; tests/test_round3.py:33-75
+  log-when-unavailable:
+    status: done
+    comment: >-
+      Joignabilité transport suivie par entrée : INFO une fois à la panne puis une fois au retour observé, sans secret ; répétitions silencieuses. HTTP reçu, même erreur auth/quota, prouve la connexion et pas la livraison. Aucun polling/SMS de sonde, commandes encore disponibles. Séquences panne/répétition/403/succès/rechute testées.
+  # Silver / P — sensor.py:46; button.py:16; notify.py:18; tests/test_local_audit.py
+  parallel-updates:
+    status: done
+    comment: >-
+      PARALLEL_UPDATES explicite : sensor 0, button 1, notify 1, vérifié par test. Limites par plateforme, pas verrou global interplateformes/lignes.
+  # Silver / P — config_flow.py:160-201; helpers.py:184-199; tests/test_round2.py
+  reauthentication-flow:
+    status: done
+    comment: >-
+      HTTP403 devient erreur HA traduite et appelle ConfigEntry.async_start_reauth ; les autres erreurs ne déclenchent pas reauth. Formulaire sans SMS ; soumission explicite valide la clé sur username fixe, contrôle unique_id, met à jour seulement token et recharge la même entrée. Erreurs, reprise, mismatch et déduplication testés avec objets HA natifs.
+  # Silver / P — tests/test_round7.py; tests/test_round2.py; tests/test_round5.py; tests/test_round6.py; round7-evidence/coverage*.json
+  test-coverage:
+    status: done
+    comment: >-
+      217tests dans chacune des4variantes HA2025.12/2026.11 ×SDK0.2/0.3,28nouveaux depuis round6. Actuel99,648 %,historique99,179 %,union réelle99,648 % :711/711lignes,139/142branches. Tous modules>95 % actuel/union ; migration moderne100 %,ancien chemins modernes non exécutés. Exclusions standard TYPE_CHECKING/Protocol seulement (9lignes), aucun omit/exclusion ajoutée. Tests natifs/contractuels et restauration ; pas CI distante ou Free réel.
+  # Gold / P — helpers.py:58-71; __init__.py:139-146; sensor.py:75-94
+  devices:
+    status: done
+    comment: >-
+      Un DeviceEntryType.SERVICE par ligne ; identifiant, nom, fabricant, modèle et sw_version fournis, cinq entités regroupées. sw_version affichée 6.12.8 ne correspond pas au manifest 6.12.12 : incohérence séparée à corriger.
+  # Gold / P — diagnostics.py; sensor.py; tests/test_local_audit.py; tests/test_round7.py; round7-evidence/storage-round6-baseline.log; storage-round7.log
+  diagnostics:
+    status: done
+    comment: >-
+      Export diagnostics par allowlist : clé/compte/titre/alias/téléphone/message/test_message masqués, données arbitraires écartées. En plus, métadonnées de sauvegarde validées avant republication dans état HA : compteurs, timestamps, erreurs/quota et journal ; champs inconnus/chaînes non reconnues retirés. Probe identique échoue round6/passe round7 sur snapshot synthétique ; valeurs valides et backup original conservés. Ne purge pas anciens stockages/backups/logs ; alias/IDs/événements compatibles ne sont pas anonymisation générale.
+  # Gold / E — manifest.json:16; config_flow.py:45-60; bibliothèque freesms
+  discovery:
+    status: exempt
+    comment: >-
+      Service cloud Free Mobile identifié par compte/clé, aucun équipement local annonçable, bus ou mécanisme de découverte exposé par cette API.
+  # Gold / E — config_flow.py:45-60; bibliothèque freesms (URL fixe)
+  discovery-update-info:
+    status: exempt
+    comment: >-
+      Aucune adresse utilisateur à mettre à jour par discovery : URL cloud fixe et ligne identifiée par username.
+  # Gold / E — README.md:209-222; helpers.py:164-224; sensor.py:129-239
+  docs-data-update:
+    status: exempt
+    comment: >-
+      Pas de polling ni push de données Free : uniquement résultat de commandes HA et compteurs locaux. Exception officielle sans polling/réception de mises à jour. README explique compteurs locaux, minuit différé et dernière joignabilité api_reachable.
+  # Gold / P — README.md:85-115,149-191; examples/
+  docs-examples:
+    status: done
+    comment: >-
+      Exemple d’automatisation alarme vers notify.send_message, service alternatif, historique Markdown et exemples YAML ; schémas YAML parsés, envoi mocké, pas exécution sur une alarme réelle.
+  # Gold / P — README.md:209-222; helpers.py:129-161; sensor.py:129-133
+  docs-known-limitations:
+    status: done
+    comment: >-
+      Limites décrites et recoupées avec code : sa propre ligne, compteurs locaux/minuit différé, 50 tentatives sans corps, carte160/backend1000, retry500, disponibilité et fallback notify non restrictif.
+  # Gold / E — manifest.json:16; helpers.py:58-71
+  docs-supported-devices:
+    status: exempt
+    comment: >-
+      Service cloud d’envoi à sa propre ligne, pas intégration de modèles d’appareils physiques ; exception officielle correspondante. Les prérequis compte Free restent à documenter sous installation.
+  # Gold / P — README.md:21-31,119-163; sensor.py; notify.py; button.py
+  docs-supported-functions:
+    status: done
+    comment: >-
+      Fonctions principales notify, bouton, trois capteurs, événements, diagnostics, carte décrites et retrouvées dans code/probes. N’implique pas que tous les détails/options sont documentés.
+  # Gold / P — README.md:Résoudre les erreurs; const.py; helpers.py:108-126
+  docs-troubleshooting:
+    status: done
+    comment: >-
+      Guide des erreurs400/402/403/500, panne réseau, cible inconnue et carte absente ; reconfiguration manuelle et vérification avant partage des diagnostics.
+  # Gold / P — README.md:85-104,119-129; __init__.py:70-103
+  docs-use-cases:
+    status: done
+    comment: >-
+      Cas utilisateur alarme activée notifiée par SMS et envoi manuel depuis dashboard, adossés aux fonctionnalités réelles.
+  # Gold / E — __init__.py:120-150; helpers.py:58-71; config_flow.py:45-60
+  dynamic-devices:
+    status: exempt
+    comment: >-
+      Un appareil service fixe par config entry/ligne ; ajout d’une autre ligne = nouvelle entrée, pas enfant dynamique de hub/compte. Exception officielle single fixed device.
+  # Gold / P — sensor.py:63-73; button.py:27-32; tests/test_round3.py:189-232
+  entity-category:
+    status: done
+    comment: >-
+      État et bouton de test Diagnostic ; compteurs et notify principaux. Catégories et mises à jour de métadonnées testées via vrai registre HA pour les cinq entités, sans changement entity_id/unique_id, nom ou icône personnalisés. Placement en dashboard automatique susceptible de changer.
+  # Gold / P — sensor.py:63-73,155-170; button.py:27-42; tests/test_round6.py; round6-evidence/hassfest.log
+  entity-device-class:
+    status: done
+    comment: >-
+      Statut enum avec options historiques Idle/Last sent/Quota/Error inchangées, restaurations connues conservées et état non supporté ramené à Idle. Vraies plateformes des deux HA valident cette métadonnée. Pas de classe SMS/count adaptée aux compteurs, ni identify/restart/update au bouton ; notify sans classe pertinente. Aucun renommage des états ou IDs pour obtenir une traduction.
+  # Gold / P — button.py:27-42; sensor.py; notify.py; tests/test_round6.py
+  entity-disabled-by-default:
+    status: done
+    comment: >-
+      Seul bouton de dépannage occasionnel Test SMS désactivé à sa première création ; vrais registres/loader prouvent absence de SMS et maintien des choix existants activés/désactivés. Notify/compteurs métier/état de retour restent disponibles sans polling bruyant. Activation utilisateur puis panne/retry via bouton démontrés sans SMS de setup. Jugement usage documenté, pas statistique majoritaire inventée.
+  # Gold / P — notify.py:31-43; sensor.py:63-73,244-281; button.py:27-42; strings.json; translations/en.json; translations/fr.json; tests/test_round5.py
+  entity-translations:
+    status: done
+    comment: >-
+      Les cinq entités ont une translation_key et un nom dans strings.json et traductions EN/FR ; notify sms nommé SMS dans les deux langues. Pas de _attr_name codé en dur pour masquer la traduction ; aliases utilisateur jamais traduits. JSON réels exercés par le moteur de noms HA, noms personnalisés du registre prioritaires ; noms vides et défauts hérités documentés. Pas certification navigateur/HACS ou toutes langues.
+  # Gold / P — helpers.py:91-126; __init__.py:92-101; strings.json:exceptions
+  exception-translations:
+    status: done
+    comment: >-
+      Exceptions produites par l’intégration ont translation_domain/key et chaînes correspondantes pour validation/API/réseau. Erreurs propagées d’autres intégrations hors périmètre.
+  # Gold / P — icons.json; notify.py:31-43; tests/test_round3.py; tests/test_round5.py; round5-evidence/hassfest.log
+  icon-translations:
+    status: done
+    comment: >-
+      Icônes par translation_key pour les cinq entités, notify.sms compris ; JSON testé EN/FR et validé hassfest. Pas d’icône codée dans la classe notify ; bouton conserve son icône de test. Les icônes de registre personnalisées restent inchangées après migration native.
+  # Gold / P — config_flow.py:104-158; tests/test_round2.py
+  reconfiguration-flow:
+    status: done
+    comment: >-
+      Reconfigure garde username fixe, valide clé par SMS explicite et téléphone, met à jour/recharge par API HA. Tests natifs formulaire, téléphone invalide, timeout et reprise ; anciens tests couvrent statut403. Pas de listener générique causant double reload.
+  # Gold / P — helpers.py:195-198; config_flow.py:160-209; tests/test_round6.py; docs/REMAINING_ACTIONS.md
+  repair-issues:
+    status: done
+    comment: >-
+      Auth403 déclenche la réparation native HA de cette entrée : vraie issue config_entry_reauth, un seul flow après deux refus, lien au flow et nettoyage après succès, mêmes IDs et reload sans SMS. Inventaire des autres erreurs actuel : formulaire/action pour message/cible, attente quota, incident transport/serveur transitoire ; pas autre réparation persistante spécifique identifiée. Pas de doublon custom ou exemption générale ; nouveaux cas permanents à revoir.
+  # Gold / E — __init__.py:120-150; helpers.py:58-71
+  stale-devices:
+    status: exempt
+    comment: >-
+      Un seul appareil fixe, lié à la vie de son entrée ; pas d’enfant pouvant disparaître indépendamment. Exception officielle single fixed device, pas besoin de suppression arbitraire du device actif.
+  # Platinum / M — api.py; helpers.py:129-161; docs/TRANSPORT_DECISION.md; round5-evidence/candidate-source-verification.json; httpx-session-contract.json
+  async-dependency:
+    status: todo
+    comment: >-
+      Production toujours freesms/requests en executor, pas async natif ni timeout total. Source/licence/publication du candidat freemobile-sms-client0.1.0 désormais vérifiées (attestations wheel/sdist, code identique au commit). Non adopté : tagv0.1.2/artifact0.1.0 incohérent, maintenance peu étayée, contrat HA httpx/httpx2, POST fournisseur, confidentialité/annulation et matrice à établir avant migration. Décision arrêtée, pas recherche indéfinie ni faux blocage de capacité. Preuves et décision rounds4–6 réutilisées sans nouvelle recherche réseau round7 ; aucun changement de dépendance/publication.
+  # Platinum / M — api.py; helpers.py:129-161; docs/TRANSPORT_DECISION.md; round5-evidence/candidate-source-verification.json; httpx-session-contract.json
+  inject-websession:
+    status: todo
+    comment: >-
+      Pas de session HA injectée en production. Candidat accepte un client externe sans le fermer, capacité reconnue et source attestée ; pas adopté. HA2025.12 fournit httpx, HA2026.11 httpx2 alors que SDK annote httpx ; compatibilité structurelle possible mais non démontrée. Pas de changement global d’une session partagée ou session indépendante pour gagner un point. Preuves et décision rounds4–6 réutilisées sans nouvelle recherche réseau round7 ; aucun changement de dépendance/publication.
+  # Platinum / M — schema.py; migration.py; api.py; mypy.ini; round7-evidence/mypy.log; mypy-ha2025.log; mypy-contract-*.log
+  strict-typing:
+    status: todo
+    comment: >-
+      Dette locale interversions éliminée : mypy strict0erreur/12modules exécuté DANS les deux environnements HA2025.12/2026.11 avec freesms0.3. Schémas issus de la classe réelle du PLATFORM_SCHEMA public HA, marqueurs du même moteur avec contrats callable/hashable ; aucun import probatio uniquement pour TYPE_CHECKING. Cache legacy : Protocol ciblé + liaison de signature native avant appel, pas cast/ignore pour masquer branche privée. Probes positifs acceptés et deux erreurs de contrats négatifs effectivement détectées par les deux checkers. Règle officielle toujours todo : freesms0.2sans py.typed,0.3méthodes utilisées non annotées et inscription core non faite ; la frontière SDK cast/Protocol préexistante ne prouve pas typage amont.
