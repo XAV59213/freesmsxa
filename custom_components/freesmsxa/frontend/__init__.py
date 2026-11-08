@@ -9,10 +9,11 @@ from typing import Any
 from aiohttp import web
 
 from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http import HomeAssistantView, StaticPathConfig
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers.http import HomeAssistantView
 
 from ..const import (
     CARD_FILENAME,
@@ -50,7 +51,7 @@ class FreeSMSXACardView(HomeAssistantView):
     name = "api:freesmsxa:card"
     requires_auth = False
 
-    async def get(self, request):
+    async def get(self, request: web.Request) -> web.Response:
         path = Path(__file__).parent / CARD_FILENAME
         body = await request.app["hass"].async_add_executor_job(
             path.read_text, "utf-8"
@@ -96,7 +97,7 @@ class JSModuleRegistration:
     async def _async_register_path(self) -> None:
         try:
             await self.hass.http.async_register_static_paths(
-                [StaticPathConfig(URL_BASE, Path(__file__).parent, False)]
+                [StaticPathConfig(URL_BASE, str(Path(__file__).parent), False)]
             )
         except RuntimeError:
             _LOGGER.debug("Static path already registered: %s", URL_BASE)
@@ -150,7 +151,7 @@ class JSModuleRegistration:
     async def _retry_resources(self, _now: Any) -> None:
         await self._async_register_lovelace_resources()
 
-    async def _async_sync_modules(self, resources: Any, items: list[dict]) -> None:
+    async def _async_sync_modules(self, resources: Any, items: list[dict[str, Any]]) -> None:
         """Keep existing resources, just bump the cache-bust version."""
         wanted = {STATIC_CARD_PATH}
         versioned_static = f"{STATIC_CARD_PATH}?v={VERSION}"

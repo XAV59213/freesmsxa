@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import logging
-
-import voluptuous as vol
-from freesms import FreeClient
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_NAME, CONF_USERNAME
@@ -24,8 +22,14 @@ from .const import (
     PLATFORMS,
     SERVICE_SEND_SMS,
 )
+from .api import FreeClient, SMSClient
 from .frontend import JSModuleRegistration
 from .helpers import apply_debug_logging, build_device_info
+from .migration import async_migrate_notify_name
+from .schema import Required, Schema
+
+if TYPE_CHECKING:
+    from .sensor import FreeSMSSensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,17 +40,30 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 class FreeSMSRuntimeData:
     """Runtime data attached to a config entry."""
 
-    client: FreeClient
+    client: SMSClient
     username: str
     alias: str
     phone_number: str | None
-    sensor: object | None = field(default=None)
+    sensor: FreeSMSSensor | None = field(default=None)
+    # Last observed transport reachability, not live delivery capability.
+    api_reachable: bool | None = None
+
+    def record_api_reachability(self, reachable: bool) -> None:
+        """Record completed attempts without polling or disabling retry commands."""
+        previous = self.api_reachable
+        self.api_reachable = reachable
+        if previous is reachable:
+            return
+        if not reachable:
+            _LOGGER.info("Free Mobile API connection unavailable")
+        elif previous is False:
+            _LOGGER.info("Free Mobile API connection restored")
 
 
 type FreeSMSConfigEntry = ConfigEntry[FreeSMSRuntimeData]
 
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up the Free Mobile SMS XA integration."""
     hass.data.setdefault(DOMAIN, {})
 
@@ -89,10 +106,10 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         DOMAIN,
         SERVICE_SEND_SMS,
         handle_send_sms,
-        schema=vol.Schema(
+        schema=Schema(
             {
-                vol.Required(ATTR_TARGET): cv.string,
-                vol.Required(ATTR_MESSAGE): cv.string,
+                Required(ATTR_TARGET): cv.string,
+                Required(ATTR_MESSAGE): cv.string,
             }
         ),
     )
@@ -128,14 +145,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: FreeSMSConfigEntry) -> b
         entry_type=device_info["entry_type"],
     )
 
+    async_migrate_notify_name(hass, entry)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
-
-
-async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload the entry when options change."""
-    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: FreeSMSConfigEntry) -> bool:
