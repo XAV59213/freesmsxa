@@ -146,12 +146,13 @@ async def test_retry_is_bounded_and_callback_retries_once(caplog):
 
 
 @pytest.mark.asyncio
-async def test_resource_sync_only_changes_matching_unversioned_url():
+@pytest.mark.parametrize("old_version", ["old", "6.12.8", "6.12.12"])
+async def test_resource_sync_only_changes_matching_outdated_url(old_version):
     res = resources()
     reg = front.JSModuleRegistration(frontend_hass(res))
     versioned = f"{STATIC_CARD_PATH}?v={VERSION}"
     items = [
-        {"id": "old", "url": f"{STATIC_CARD_PATH}?v=old"},
+        {"id": "old", "url": f"{STATIC_CARD_PATH}?v={old_version}"},
         {"id": "current", "url": versioned},
         {"id": "other", "url": "/unrelated.js?v=old"},
     ]

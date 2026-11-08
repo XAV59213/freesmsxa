@@ -107,13 +107,14 @@ def test_local_brand_icons_are_square_rgba_png():
 
 
 
-def test_manifest_keeps_core_compatible_dependency_without_bumping_version():
+def test_manifest_keeps_core_compatible_dependency_and_cache_version():
     import importlib.metadata
     import json
     from pathlib import Path
     root = Path(__file__).resolve().parents[1]
     manifest = json.loads((root / 'custom_components/freesmsxa/manifest.json').read_text())
-    assert manifest['version'] == '6.12.12'
+    from custom_components.freesmsxa.const import VERSION
+    assert manifest['version'] == VERSION
     assert manifest['requirements'] == ['freesms>=0.2.0']
     from packaging.requirements import Requirement
     # The built-in core integration also uses this library in the same Python process.
