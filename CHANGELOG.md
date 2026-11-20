@@ -4,6 +4,18 @@ All notable changes to the Free Mobile SMS XA Home Assistant integration will be
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [6.12.14] - 2026-11-20
+
+### FR
+
+- Documentation : ajout du badge cliquable Forum Domotique (40 px) en haut du README, vers le sujet de discussion de l’intégration.
+- Version du manifest et du cache frontend alignée sur 6.12.14. Aucun changement fonctionnel.
+
+### EN
+
+- Docs: added the clickable Forum Domotique badge (40 px) at the top of the README.
+- Manifest and frontend cache version aligned to 6.12.14. No functional change.
+
 ## [6.12.13] - 2026-11-08
 
 ### FR
